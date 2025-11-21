@@ -19,7 +19,7 @@ def current_weather(request):
     }
     
     city = request.GET.get ('city', 'pokhara').strip().lower()
-    
+
     if city not in cities:
         return Response({
             "error":"City is not found"
@@ -27,7 +27,7 @@ def current_weather(request):
     
     lat, lon = cities[city]
 
-    url =f"https://api.open-meteo.com/v1/forecast?latitude={lat}&longitude={lon}&current_weather=true"
+    url = f"https://api.open-meteo.com/v1/forecast?latitude={lat}&longitude={lon}&daily=temperature_2m_max,temperature_2m_min,weathercode&timezone=GMT"
 
     response = requests.get(url)
 
