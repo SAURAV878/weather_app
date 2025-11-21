@@ -18,9 +18,13 @@ def current_weather(request):
         "biratnagar": (26.48, 87.27)
     }
     
-
     city = request.GET.get ('city', 'pokhara').lower()
-    lat, lon = cities.get(city)
+    if city not in cities:
+        return Response({
+            "error":"City is not found"
+        }, status=400)
+    
+    lat, lon = cities[city]
 
     url =f"https://api.open-meteo.com/v1/forecast?latitude={lat}&longitude={lon}&current_weather=true"
 
@@ -33,7 +37,7 @@ def current_weather(request):
     weather['longitude'] = data.get("longitude")
     weather['elevation'] = data.get("elevation")
     weather['timezone'] = data.get("timezone")
-    
+
     weather['city'] = city.capitalize()
 
     return Response(weather)
