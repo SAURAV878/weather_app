@@ -40,8 +40,6 @@ def current_weather(request):
     weather['elevation'] = data.get("elevation")
     weather['timezone'] = data.get("timezone")
 
-   
-
     daily = data.get('daily', {})
     dates = daily.get('time', [])
     max_temps = daily.get('temperature_2m_max', [])
