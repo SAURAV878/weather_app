@@ -26,9 +26,21 @@ def current_weather(request):
         }, status=400)
     
     lat, lon = cities[city]
+    unit = request.GET.get('unit', 'celsius').strip().lower()
+    if unit == 'fahrenheit':
+        unit_param = 'fahrenheit'
+    else:
+        unit_param = 'celsius'
 
-    url = f"https://api.open-meteo.com/v1/forecast?latitude={lat}&longitude={lon}&daily=temperature_2m_max,temperature_2m_min,weathercode&timezone=GMT"
+    days = int(request.GET.get('days', 7))
+        
 
+    url = (
+        f"https://api.open-meteo.com/v1/forecast?"
+        f"latitude={lat}&longitude={lon}&"
+        f"daily=temperature_2m_max,temperature_2m_min,weathercode&"
+        f"timezone=GMT&temperature_unit={unit_param}&forecast_days={days}"
+    )   
 
     response = requests.get(url)
 
