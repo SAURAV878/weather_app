@@ -19,6 +19,7 @@ def current_weather(request):
     }
     
     city = request.GET.get ('city', 'pokhara').strip().lower()
+    
     if city not in cities:
         return Response({
             "error":"City is not found"
