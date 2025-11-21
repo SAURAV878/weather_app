@@ -29,6 +29,7 @@ def current_weather(request):
 
     url = f"https://api.open-meteo.com/v1/forecast?latitude={lat}&longitude={lon}&daily=temperature_2m_max,temperature_2m_min,weathercode&timezone=GMT"
 
+
     response = requests.get(url)
 
     data = response.json()
@@ -39,9 +40,30 @@ def current_weather(request):
     weather['elevation'] = data.get("elevation")
     weather['timezone'] = data.get("timezone")
 
-    weather['city'] = city.capitalize()
+   
 
-    return Response(weather)
+    daily = data.get('daily', {})
+    dates = daily.get('time', [])
+    max_temps = daily.get('temperature_2m_max', [])
+    min_temps = daily.get('temperature_2m_min', [])
+    codes = daily.get('weathercode', [])
+
+    forecast_list = []
+    for i in range(len(dates)):
+        forecast_list.append({
+            'date': dates[i],
+            'max': max_temps[i],
+            'min': min_temps[i],
+            'weathercode': codes[i]
+        })
+
+
+
+    return Response({
+        'city': city.capitalize(),
+        'current': weather,
+        'forecast': forecast_list
+    })
 
 
 
