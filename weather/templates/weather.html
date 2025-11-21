@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Weather App</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-blue-50 min-h-screen flex flex-col items-center py-10">
+
+    <h1 class="text-3xl font-bold mb-6">Weather App</h1>
+
+    <!-- Input Section -->
+    <div class="flex gap-4 mb-6">
+        <input id="cityInput" type="text" placeholder="Enter city (pokhara, kathmandu, biratnagar)"
+               class="px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400">
+        <select id="unitSelect" class="px-4 py-2 border rounded-md">
+            <option value="celsius">Celsius</option>
+            <option value="fahrenheit">Fahrenheit</option>
+        </select>
+        <button id="fetchWeatherBtn"
+                class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">Get Weather</button>
+    </div>
+
+    <!-- Weather Display -->
+    <div id="weatherDisplay" class="w-full max-w-xl bg-white p-6 rounded-md shadow-md hidden">
+        <h2 id="cityName" class="text-2xl font-bold mb-4"></h2>
+        <div id="currentWeather" class="mb-6">
+            <p><strong>Latitude:</strong> <span id="lat"></span></p>
+            <p><strong>Longitude:</strong> <span id="lon"></span></p>
+            <p><strong>Elevation:</strong> <span id="elev"></span> m</p>
+            <p><strong>Timezone:</strong> <span id="tz"></span></p>
+        </div>
+
+        <h3 class="text-xl font-semibold mb-2">7-Day Forecast</h3>
+        <div id="forecast" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+    </div>
+
+    <script>
+        const fetchBtn = document.getElementById('fetchWeatherBtn');
+
+        fetchBtn.addEventListener('click', async () => {
+            const city = document.getElementById('cityInput').value.trim();
+            const unit = document.getElementById('unitSelect').value;
+
+            if (!city) return alert("Please enter a city.");
+
+            const response = await fetch(`/api/current_weather/?city=${city}&unit=${unit}`);
+            const data = await response.json();
+
+            if (data.error) {
+                alert(data.error);
+                return;
+            }
+
+            // Show weather container
+            const weatherDiv = document.getElementById('weatherDisplay');
+            weatherDiv.classList.remove('hidden');
+
+            // Current Weather
+            document.getElementById('cityName').textContent = data.city;
+            document.getElementById('lat').textContent = data.current.latitude;
+            document.getElementById('lon').textContent = data.current.longitude;
+            document.getElementById('elev').textContent = data.current.elevation;
+            document.getElementById('tz').textContent = data.current.timezone;
+
+            // Forecast
+            const forecastDiv = document.getElementById('forecast');
+            forecastDiv.innerHTML = '';
+            data.forecast.forEach(day => {
+                const card = document.createElement('div');
+                card.className = 'p-4 bg-blue-100 rounded-md shadow';
+                card.innerHTML = `
+                    <p><strong>Date:</strong> ${day.date}</p>
+                    <p><strong>Max:</strong> ${day.max}°</p>
+                    <p><strong>Min:</strong> ${day.min}°</p>
+                    <p><strong>Weather Code:</strong> ${day.weathercode}</p>
+                `;
+                forecastDiv.appendChild(card);
+            });
+        });
+    </script>
+
+</body>
+</html>
