@@ -17,6 +17,7 @@ def current_weather(request):
         "kathmandu" : (27.7, 85.32),
         "biratnagar": (26.48, 87.27)
     }
+    
 
     city = request.GET.get ('city', 'pokhara').lower()
     lat, lon = cities.get(city)
@@ -28,6 +29,11 @@ def current_weather(request):
     data = response.json()
 
     weather = data.get('current_weather', {})
+    weather['latitude'] = data.get("latitude")
+    weather['longitude'] = data.get("longitude")
+    weather['elevation'] = data.get("elevation")
+    weather['timezone'] = data.get("timezone")
+    
     weather['city'] = city.capitalize()
 
     return Response(weather)
