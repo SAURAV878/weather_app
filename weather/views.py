@@ -3,98 +3,106 @@ from rest_framework.response import Response
 from rest_framework.decorators import api_view
 import requests
 
+
+# ---------------- HOME PAGE ----------------
 def home(request):
     return render(request, "weather.html")
 
 
+# ---------------- TEST API ----------------
 @api_view(['GET'])
 def test(request):
     return Response({
-        'message': 'Weather Api working'
+        "message": "Weather API working"
     })
 
-# Create your views here.
+
+# ---------------- MAIN WEATHER API ----------------
 @api_view(['GET'])
 def current_weather(request):
-    cities = {
-        "pokhara" : (28.2096, 83.9856),
-        "kathmandu" : (27.7, 85.32),
-        "biratnagar": (26.48, 87.27)
-    }
-    
-    city = request.GET.get ('city', 'pokhara').strip().lower()
+    city = request.GET.get('city', '').strip()
 
-    if city not in cities:
-        return Response({
-            "error":"City is not found"
-        }, status=400)
-    
-    lat, lon = cities[city]
-    unit = request.GET.get('unit', 'celsius').strip().lower()
-    if unit == 'fahrenheit':
-        unit_param = 'fahrenheit'
-    else:
-        unit_param = 'celsius'
+    if not city:
+        return Response({"error": "City name is required"}, status=400)
 
-    days = int(request.GET.get('days', 7))
-        
+    # 1) GEOCODING API – get city, country, lat, lon
+    geo_url = f"https://geocoding-api.open-meteo.com/v1/search?name={city}&count=1"
+    geo_res = requests.get(geo_url).json()
 
+    if "results" not in geo_res:
+        return Response({"error": "City not found"}, status=404)
+
+    place = geo_res["results"][0]
+
+    city_name = place["name"]
+    country = place["country"]
+    lat = place["latitude"]
+    lon = place["longitude"]
+
+    # 2) UNIT
+    unit = request.GET.get("unit", "celsius").lower()
+    unit_param = "fahrenheit" if unit == "fahrenheit" else "celsius"
+
+    # 3) DAYS
+    days = int(request.GET.get("days", 7))
+
+    # 4) MAIN WEATHER API
     url = (
         f"https://api.open-meteo.com/v1/forecast?"
         f"latitude={lat}&longitude={lon}&"
+        f"current_weather=true&"
         f"daily=temperature_2m_max,temperature_2m_min,weathercode&"
         f"timezone=GMT&temperature_unit={unit_param}&forecast_days={days}"
-    )   
+    )
 
-    response = requests.get(url)
+    data = requests.get(url).json()
 
-    data = response.json()
+    # 5) WEATHER DESCRIPTION MAP
+    weather_codes = {
+        0: "Clear sky ☀️",
+        1: "Mainly clear 🌤",
+        2: "Partly cloudy ⛅",
+        3: "Overcast ☁️",
+        45: "Fog 🌫",
+        48: "Depositing rime fog 🌫",
+        51: "Light drizzle 🌦",
+        53: "Moderate drizzle 🌦",
+        55: "Dense drizzle 🌧",
+        61: "Light rain 🌧",
+        63: "Moderate rain 🌧",
+        65: "Heavy rain 🌧",
+        71: "Light snow ❄️",
+        73: "Moderate snow ❄️",
+        75: "Heavy snow ❄️",
+        80: "Rain showers 🌦",
+        81: "Moderate rain showers 🌧",
+        82: "Violent rain showers 🌧",
+    }
 
-    weather = data.get('current_weather', {})
-    weather['latitude'] = data.get("latitude")
-    weather['longitude'] = data.get("longitude")
-    weather['elevation'] = data.get("elevation")
-    weather['timezone'] = data.get("timezone")
+    current = data.get("current_weather", {})
+    current_code = current.get("weathercode", 0)
+    current["weather_description"] = weather_codes.get(current_code, "Unknown")
 
-    daily = data.get('daily', {})
-    dates = daily.get('time', [])
-    max_temps = daily.get('temperature_2m_max', [])
-    min_temps = daily.get('temperature_2m_min', [])
-    codes = daily.get('weathercode', [])
-
+    # 6) FORECAST DATA
+    daily = data.get("daily", {})
     forecast_list = []
-    for i in range(len(dates)):
+
+    for i in range(len(daily.get("time", []))):
+        code = daily.get("weathercode", [])[i]
         forecast_list.append({
-            'date': dates[i],
-            'max': max_temps[i],
-            'min': min_temps[i],
-            'weathercode': codes[i]
+            "date": daily["time"][i],
+            "max": daily["temperature_2m_max"][i],
+            "min": daily["temperature_2m_min"][i],
+            "weathercode": code,
+            "description": weather_codes.get(code, "Unknown"),
         })
 
-
-
     return Response({
-        'city': city.capitalize(),
-        'current': weather,
-        'forecast': forecast_list
+        "city": city_name,
+        "country": country,
+        "latitude": lat,
+        "longitude": lon,
+        "unit": unit_param,
+        "current": current,
+        "forecast": forecast_list
     })
-
-
-
- 
-  
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-  
