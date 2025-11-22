@@ -1,23 +1,8 @@
-from django.shortcuts import render
-from rest_framework.response import Response
 from rest_framework.decorators import api_view
+from rest_framework.response import Response
 import requests
 
 
-# ---------------- HOME PAGE ----------------
-def home(request):
-    return render(request, "weather.html")
-
-
-# ---------------- TEST API ----------------
-@api_view(['GET'])
-def test(request):
-    return Response({
-        "message": "Weather API working"
-    })
-
-
-# ---------------- MAIN WEATHER API ----------------
 @api_view(['GET'])
 def current_weather(request):
     city = request.GET.get('city', '').strip()
@@ -25,7 +10,9 @@ def current_weather(request):
     if not city:
         return Response({"error": "City name is required"}, status=400)
 
-    # 1) GEOCODING API – get city, country, lat, lon
+    # ------------------------------------------
+    # 1) GEOCODING API – Convert City → Lat/Lon
+    # ------------------------------------------
     geo_url = f"https://geocoding-api.open-meteo.com/v1/search?name={city}&count=1"
     geo_res = requests.get(geo_url).json()
 
@@ -39,14 +26,20 @@ def current_weather(request):
     lat = place["latitude"]
     lon = place["longitude"]
 
-    # 2) UNIT
+    # ------------------------------------------
+    # 2) UNIT SELECTION
+    # ------------------------------------------
     unit = request.GET.get("unit", "celsius").lower()
     unit_param = "fahrenheit" if unit == "fahrenheit" else "celsius"
 
-    # 3) DAYS
+    # ------------------------------------------
+    # 3) NUMBER OF FORECAST DAYS
+    # ------------------------------------------
     days = int(request.GET.get("days", 7))
 
+    # ------------------------------------------
     # 4) MAIN WEATHER API
+    # ------------------------------------------
     url = (
         f"https://api.open-meteo.com/v1/forecast?"
         f"latitude={lat}&longitude={lon}&"
@@ -57,7 +50,9 @@ def current_weather(request):
 
     data = requests.get(url).json()
 
-    # 5) WEATHER DESCRIPTION MAP
+    # ------------------------------------------
+    # 5) WEATHER CODE → HUMAN DESCRIPTION
+    # ------------------------------------------
     weather_codes = {
         0: "Clear sky ☀️",
         1: "Mainly clear 🌤",
@@ -79,11 +74,16 @@ def current_weather(request):
         82: "Violent rain showers 🌧",
     }
 
+    # ------------------------------------------
+    # 6) CURRENT WEATHER EXTRA DATA
+    # ------------------------------------------
     current = data.get("current_weather", {})
     current_code = current.get("weathercode", 0)
     current["weather_description"] = weather_codes.get(current_code, "Unknown")
 
-    # 6) FORECAST DATA
+    # ------------------------------------------
+    # 7) FORECAST FOR NEXT DAYS
+    # ------------------------------------------
     daily = data.get("daily", {})
     forecast_list = []
 
@@ -97,6 +97,9 @@ def current_weather(request):
             "description": weather_codes.get(code, "Unknown"),
         })
 
+    # ------------------------------------------
+    # 8) SEND FINAL JSON RESPONSE
+    # ------------------------------------------
     return Response({
         "city": city_name,
         "country": country,
