@@ -3,6 +3,10 @@ from rest_framework.response import Response
 import requests
 
 
+# ---------------- HOME PAGE ----------------
+def home(request):
+    return render(request, "weather.html")
+
 @api_view(['GET'])
 def current_weather(request):
     city = request.GET.get('city', '').strip()
