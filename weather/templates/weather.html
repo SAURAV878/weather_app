@@ -1,146 +1,203 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="light">
 <head>
     <meta charset="UTF-8">
     <title>Weather App</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+        }
+    </script>
 </head>
 
-<body class="bg-gradient-to-br from-blue-200 to-blue-500 min-h-screen p-6">
+<body class="bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors duration-500">
 
-    <div class="max-w-xl mx-auto bg-white shadow-xl rounded-2xl p-6">
+    <div class="max-w-2xl mx-auto p-4 sm:p-6">
 
-        <h1 class="text-3xl font-bold text-center mb-6">🌦 Weather App</h1>
-
-        <!-- Search Section -->
-        <div class="flex gap-3 mb-6">
-            <input id="cityInput" 
-                   type="text" 
-                   placeholder="Enter city name..." 
-                   class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400">
-            
-            <select id="unitSelect" class="px-3 py-2 border rounded-lg">
-                <option value="celsius">°C</option>
-                <option value="fahrenheit">°F</option>
-            </select>
-
-            <button id="fetchWeatherBtn"
-                class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
-                Search
+        <!-- Header: Title & Theme Toggle -->
+        <header class="flex justify-between items-center mb-6">
+            <h1 class="text-3xl font-bold text-gray-800 dark:text-white">🌦 Weather App</h1>
+            <button id="theme-toggle" class="px-4 py-2 rounded-lg bg-gray-200 dark:bg-gray-700 text-lg">
+                <span id="theme-icon">🌙</span>
             </button>
-        </div>
+        </header>
 
-        <!-- Error Box -->
-        <div id="errorBox" class="hidden bg-red-100 text-red-700 p-3 rounded-lg mb-4"></div>
+        <main class="bg-white dark:bg-gray-800 shadow-xl rounded-2xl p-6">
+            
+            <!-- Section 1: Search -->
+            <section id="search-section" class="mb-6">
+                <div class="flex flex-col sm:flex-row gap-3">
+                    <input id="cityInput" type="text" placeholder="Enter city name..." 
+                           class="w-full px-4 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 focus:ring-2 focus:ring-blue-400">
+                    
+                    <select id="unitSelect" class="px-3 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600">
+                        <option value="celsius">°C</option>
+                        <option value="fahrenheit">°F</option>
+                    </select>
 
-        <!-- Loader -->
-        <div id="loader" class="hidden text-center mb-4">
-            <div class="animate-spin h-8 w-8 border-4 border-blue-600 border-t-transparent rounded-full mx-auto"></div>
-        </div>
-
-        <!-- Weather Display -->
-        <div id="weatherDisplay" class="hidden">
-
-            <h2 class="text-2xl font-bold mb-2" id="cityName"></h2>
-            <p class="text-gray-700 mb-4" id="countryName"></p>
-
-            <!-- Current Weather -->
-            <div class="flex items-center gap-4 bg-blue-100 p-4 rounded-xl mb-6">
-                <div class="text-5xl" id="currentIcon"></div>
-                <div>
-                    <p class="text-xl font-semibold"><span id="currentTemp"></span>°</p>
-                    <p class="text-gray-700" id="currentDesc"></p>
+                    <button id="fetchWeatherBtn" class="px-5 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                        Search
+                    </button>
                 </div>
+                <div id="errorBox" class="hidden bg-red-100 text-red-700 p-3 rounded-lg mt-4"></div>
+            </section>
+
+            <!-- Loader -->
+            <div id="loader" class="hidden text-center my-8">
+                <div class="animate-spin h-10 w-10 border-4 border-blue-500 border-t-transparent rounded-full mx-auto"></div>
+                <p class="mt-2 text-gray-600 dark:text-gray-400">Fetching weather...</p>
             </div>
 
-            <!-- 7-Day Forecast -->
-            <h3 class="text-xl font-semibold mb-3">7-Day Forecast</h3>
-            <div id="forecast" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
-        </div>
+            <!-- Weather Display Sections -->
+            <div id="weatherDisplay" class="hidden">
+                
+                <!-- Section 2: Current Weather -->
+                <section id="current-weather-section" class="text-center mb-8">
+                    <h2 class="text-4xl font-bold" id="cityName"></h2>
+                    <p class="text-gray-500 dark:text-gray-400 mb-4" id="countryName"></p>
+                    
+                    <div class="flex items-center justify-center gap-4 bg-blue-100 dark:bg-gray-700 p-6 rounded-xl">
+                        <div class="text-6xl" id="currentIcon"></div>
+                        <div class="text-left">
+                            <p class="text-5xl font-semibold"><span id="currentTemp"></span>°</p>
+                            <p class="text-lg text-gray-700 dark:text-gray-300" id="currentDesc"></p>
+                        </div>
+                    </div>
+                </section>
 
+                <!-- Section 3: 7-Day Forecast -->
+                <section id="forecast-section">
+                    <h3 class="text-2xl font-semibold mb-4 text-center sm:text-left">7-Day Forecast</h3>
+                    <div id="forecast" class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3 text-center">
+                        <!-- Forecast cards will be injected here -->
+                    </div>
+                </section>
+
+            </div>
+        </main>
     </div>
 
-
     <script>
-        const btn = document.getElementById("fetchWeatherBtn");
+        // --- DOM Elements ---
+        const cityInput = document.getElementById("cityInput");
+        const unitSelect = document.getElementById("unitSelect");
+        const fetchWeatherBtn = document.getElementById("fetchWeatherBtn");
         const loader = document.getElementById("loader");
         const errorBox = document.getElementById("errorBox");
+        const weatherDisplay = document.getElementById("weatherDisplay");
+        const themeToggle = document.getElementById('theme-toggle');
+        const themeIcon = document.getElementById('theme-icon');
 
-        // Weather Icons
+        // --- Weather Icons ---
         const icons = {
-            "Clear sky ☀️": "☀️",
-            "Mainly clear 🌤": "🌤",
-            "Partly cloudy ⛅": "⛅",
-            "Overcast ☁️": "☁️",
-            "Fog 🌫": "🌫",
-            "Light rain 🌧": "🌧",
-            "Moderate rain 🌧": "🌧",
-            "Heavy rain 🌧": "🌧",
-            "Light snow ❄️": "❄️",
-            "Moderate snow ❄️": "❄️",
-            "Rain showers 🌦": "🌦"
+            "Clear sky": "☀️", "Mainly clear": "🌤", "Partly cloudy": "⛅", "Overcast": "☁️",
+            "Fog": "🌫", "Light rain": "🌧", "Moderate rain": "🌧", "Heavy rain": "🌧",
+            "Light snow": "❄️", "Moderate snow": "❄️", "Rain showers": "🌦", "Snow showers": "🌨️",
+            "Thunderstorm": "⛈️"
         };
+        const defaultIcon = "🌡️";
 
-        btn.addEventListener("click", async () => {
+        // --- Theme Toggle ---
+        themeToggle.addEventListener('click', () => {
+            const html = document.documentElement;
+            html.classList.toggle('dark');
+            
+            if (html.classList.contains('dark')) {
+                themeIcon.textContent = '☀️'; // Sun icon for dark mode
+            } else {
+                themeIcon.textContent = '🌙'; // Moon icon for light mode
+            }
+        });
 
-            const city = document.getElementById("cityInput").value.trim();
-            const unit = document.getElementById("unitSelect").value;
+        // --- Event Listeners ---
+        fetchWeatherBtn.addEventListener("click", fetchWeather);
+        cityInput.addEventListener("keypress", (e) => {
+            if (e.key === "Enter") fetchWeather();
+        });
+
+        // --- Functions ---
+        async function fetchWeather() {
+            const city = cityInput.value.trim();
+            const unit = unitSelect.value;
 
             if (!city) {
                 showError("Please enter a city name.");
                 return;
             }
 
-            loader.classList.remove("hidden");
-            errorBox.classList.add("hidden");
+            showLoader(true);
+            showError(null);
+            weatherDisplay.classList.add("hidden");
 
-            const res = await fetch(`/api/current_weather/?city=${city}&unit=${unit}`);
-            const data = await res.json();
+            try {
+                const res = await fetch(`/api/current_weather/?city=${city}&unit=${unit}`);
+                if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
+                const data = await res.json();
 
-            loader.classList.add("hidden");
-
-            if (data.error) {
-                showError(data.error);
-                return;
+                if (data.error) {
+                    showError(data.error);
+                } else {
+                    displayWeather(data);
+                }
+            } catch (error) {
+                showError("An error occurred while fetching data. Please try again.");
+                console.error("Fetch Error:", error);
+            } finally {
+                showLoader(false);
             }
-
-            displayWeather(data);
-        });
+        }
 
         function showError(msg) {
-            errorBox.textContent = msg;
-            errorBox.classList.remove("hidden");
+            if (msg) {
+                errorBox.textContent = msg;
+                errorBox.classList.remove("hidden");
+            } else {
+                errorBox.classList.add("hidden");
+            }
+        }
+
+        function showLoader(isLoading) {
+            if (isLoading) {
+                loader.classList.remove("hidden");
+            } else {
+                loader.classList.add("hidden");
+            }
+        }
+
+        function findIcon(description) {
+            const key = Object.keys(icons).find(k => description.includes(k)) || defaultIcon;
+            return icons[key];
         }
 
         function displayWeather(data) {
-            document.getElementById("weatherDisplay").classList.remove("hidden");
-
-            document.getElementById("cityName").textContent = data.city;
-            document.getElementById("countryName").textContent = data.country;
+            weatherDisplay.classList.remove("hidden");
 
             // Current Weather
-            document.getElementById("currentTemp").textContent = data.current.temperature;
+            document.getElementById("cityName").textContent = data.city;
+            document.getElementById("countryName").textContent = data.country;
+            document.getElementById("currentTemp").textContent = Math.round(data.current.temperature);
             document.getElementById("currentDesc").textContent = data.current.weather_description;
-
-            document.getElementById("currentIcon").textContent =
-                icons[data.current.weather_description] || "🌡️";
+            document.getElementById("currentIcon").textContent = findIcon(data.current.weather_description);
 
             // Forecast
             const forecastDiv = document.getElementById("forecast");
-            forecastDiv.innerHTML = "";
+            forecastDiv.innerHTML = ""; 
 
             data.forecast.forEach(day => {
                 const card = document.createElement("div");
-                card.className = "p-4 bg-blue-50 rounded-xl shadow";
+                card.className = "p-3 bg-gray-100 dark:bg-gray-700 rounded-lg shadow-sm flex flex-col items-center";
+                
+                const dayName = new Date(day.date).toLocaleDateString('en-US', { weekday: 'short' });
 
                 card.innerHTML = `
-                    <p class="font-semibold">${day.date}</p>
-                    <p class="text-3xl">${icons[day.description] || "🌡️"}</p>
-                    <p><strong>Max:</strong> ${day.max}°</p>
-                    <p><strong>Min:</strong> ${day.min}°</p>
-                    <p>${day.description}</p>
+                    <p class="font-semibold text-sm">${dayName}</p>
+                    <p class="text-3xl my-1">${findIcon(day.description)}</p>
+                    <div class="text-xs">
+                        <span class="font-bold">${Math.round(day.max)}°</span>
+                        <span>/ ${Math.round(day.min)}°</span>
+                    </div>
                 `;
-
                 forecastDiv.appendChild(card);
             });
         }
