@@ -12,6 +12,20 @@ def home(request):
 def test(request):
     return Response({"message": "Weather API working"})
 
+# ----------------- WEATHER CODES -----------------
+WMO_CODES = {
+    0: "Clear", 1: "Clear", 2: "Clouds", 3: "Clouds",
+    45: "Fog", 48: "Fog",
+    51: "Drizzle", 53: "Drizzle", 55: "Drizzle",
+    56: "Drizzle", 57: "Drizzle",
+    61: "Rain", 63: "Rain", 65: "Rain",
+    66: "Rain", 67: "Rain",
+    71: "Snow", 73: "Snow", 75: "Snow",
+    77: "Snow",
+    80: "Rain", 81: "Rain", 82: "Rain",
+    85: "Snow", 86: "Snow",
+    95: "Thunderstorm", 96: "Thunderstorm", 99: "Thunderstorm"
+}
 
 @api_view(['GET'])
 def current_weather(request):
@@ -20,102 +34,84 @@ def current_weather(request):
     if not city:
         return Response({"error": "City name is required"}, status=400)
 
-    # ------------------------------------------
-    # 1) GEOCODING API – Convert City → Lat/Lon
-    # ------------------------------------------
+    # 1) Geocoding
     geo_url = f"https://geocoding-api.open-meteo.com/v1/search?name={city}&count=1"
     geo_res = requests.get(geo_url).json()
-
     if "results" not in geo_res:
         return Response({"error": "City not found"}, status=404)
 
     place = geo_res["results"][0]
-
-    city_name = place["name"]
-    country = place["country"]
-    lat = place["latitude"]
-    lon = place["longitude"]
-
-    # ------------------------------------------
-    # 2) UNIT SELECTION
-    # ------------------------------------------
+    lat, lon = place["latitude"], place["longitude"]
+    
+    # 2) Units
     unit = request.GET.get("unit", "celsius").lower()
     unit_param = "fahrenheit" if unit == "fahrenheit" else "celsius"
 
-    # ------------------------------------------
-    # 3) NUMBER OF FORECAST DAYS
-    # ------------------------------------------
-    days = int(request.GET.get("days", 7))
-
-    # ------------------------------------------
-    # 4) MAIN WEATHER API
-    # ------------------------------------------
-    url = (
-        f"https://api.open-meteo.com/v1/forecast?"
-        f"latitude={lat}&longitude={lon}&"
-        f"current_weather=true&"
-        f"daily=temperature_2m_max,temperature_2m_min,weathercode&"
-        f"timezone=GMT&temperature_unit={unit_param}&forecast_days={days}"
+    # 3) Weather API Call
+    forecast_url = (
+        f"https://api.open-meteo.com/v1/forecast"
+        f"?latitude={lat}&longitude={lon}"
+        f"&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,visibility,wind_speed_10m"
+        f"&hourly=temperature_2m,weather_code"
+        f"&daily=weather_code,temperature_2m_max,temperature_2m_min,uv_index_max"
+        f"&timezone=auto&temperature_unit={unit_param}"
     )
+    weather_data = requests.get(forecast_url).json()
 
-    data = requests.get(url).json()
-
-    # ------------------------------------------
-    # 5) WEATHER CODE → HUMAN DESCRIPTION
-    # ------------------------------------------
-    weather_codes = {
-        0: "Clear sky ☀️",
-        1: "Mainly clear 🌤",
-        2: "Partly cloudy ⛅",
-        3: "Overcast ☁️",
-        45: "Fog 🌫",
-        48: "Depositing rime fog 🌫",
-        51: "Light drizzle 🌦",
-        53: "Moderate drizzle 🌦",
-        55: "Dense drizzle 🌧",
-        61: "Light rain 🌧",
-        63: "Moderate rain 🌧",
-        65: "Heavy rain 🌧",
-        71: "Light snow ❄️",
-        73: "Moderate snow ❄️",
-        75: "Heavy snow ❄️",
-        80: "Rain showers 🌦",
-        81: "Moderate rain showers 🌧",
-        82: "Violent rain showers 🌧",
+    # 4) Air Quality API Call
+    aqi_url = (
+        f"https://air-quality-api.open-meteo.com/v1/air-quality"
+        f"?latitude={lat}&longitude={lon}"
+        f"&current=european_aqi"
+    )
+    aqi_data = requests.get(aqi_url).json()
+    
+    # 5) Process Current Weather
+    current = weather_data["current"]
+    current_weather = {
+        "temp": round(current["temperature_2m"]),
+        "description": WMO_CODES.get(current["weather_code"], "Clear"),
+        "main": WMO_CODES.get(current["weather_code"], "Clear"),
     }
 
-    # ------------------------------------------
-    # 6) CURRENT WEATHER EXTRA DATA
-    # ------------------------------------------
-    current = data.get("current_weather", {})
-    current_code = current.get("weathercode", 0)
-    current["weather_description"] = weather_codes.get(current_code, "Unknown")
-
-    # ------------------------------------------
-    # 7) FORECAST FOR NEXT DAYS
-    # ------------------------------------------
-    daily = data.get("daily", {})
-    forecast_list = []
-
-    for i in range(len(daily.get("time", []))):
-        code = daily.get("weathercode", [])[i]
-        forecast_list.append({
-            "date": daily["time"][i],
-            "max": daily["temperature_2m_max"][i],
-            "min": daily["temperature_2m_min"][i],
-            "weathercode": code,
-            "description": weather_codes.get(code, "Unknown"),
+    # 6) Process Details
+    details = {
+        "feels_like": round(current["apparent_temperature"]),
+        "wind_speed": round(current["wind_speed_10m"]),
+        "humidity": current["relative_humidity_2m"],
+        "visibility": round(current["visibility"] / 1000), # Meters to KM
+        "uv_index": weather_data["daily"]["uv_index_max"][0],
+        "aqi": aqi_data.get("current", {}).get("european_aqi", "n/a")
+    }
+    
+    # 7) Process Hourly Forecast (next 12 hours)
+    hourly = weather_data["hourly"]
+    hourly_forecast = []
+    for i in range(12):
+        hourly_forecast.append({
+            "time": hourly["time"][i][-5:], # "HH:MM"
+            "temp": round(hourly["temperature_2m"][i]),
+            "main": WMO_CODES.get(hourly["weather_code"][i], "Clear")
         })
 
-    # ------------------------------------------
-    # 8) SEND FINAL JSON RESPONSE
-    # ------------------------------------------
+    # 8) Process Daily Forecast (next 7 days)
+    daily = weather_data["daily"]
+    daily_forecast = []
+    for i in range(7):
+        daily_forecast.append({
+            "day": daily["time"][i],
+            "max_temp": round(daily["temperature_2m_max"][i]),
+            "min_temp": round(daily["temperature_2m_min"][i]),
+            "description": WMO_CODES.get(daily["weather_code"][i], "Clear"),
+             "main": WMO_CODES.get(daily["weather_code"][i], "Clear"),
+        })
+
     return Response({
-        "city": city_name,
-        "country": country,
-        "latitude": lat,
-        "longitude": lon,
-        "unit": unit_param,
-        "current": current,
-        "forecast": forecast_list
+        "city": place.get("name"),
+        "country": place.get("country_code"),
+        "current": current_weather,
+        "details": details,
+        "hourly": hourly_forecast,
+        "daily": daily_forecast,
+        "alerts": [] # Placeholder
     })
