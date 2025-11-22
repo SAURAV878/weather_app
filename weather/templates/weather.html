@@ -13,9 +13,9 @@
 
 <body class="bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors duration-500">
 
-    <div class="max-w-2xl mx-auto p-4 sm:p-6">
+    <div class="max-w-3xl mx-auto p-4 sm:p-6">
 
-        <!-- Header: Title & Theme Toggle -->
+        <!-- Header -->
         <header class="flex justify-between items-center mb-6">
             <h1 class="text-3xl font-bold text-gray-800 dark:text-white">🌦 Weather App</h1>
             <button id="theme-toggle" class="px-4 py-2 rounded-lg bg-gray-200 dark:bg-gray-700 text-lg">
@@ -23,41 +23,35 @@
             </button>
         </header>
 
-        <main class="bg-white dark:bg-gray-800 shadow-xl rounded-2xl p-6">
+        <!-- Main Content Blocks -->
+        <main class="space-y-6">
             
-            <!-- Section 1: Search -->
-            <section id="search-section" class="mb-6">
+            <!-- Block 1: Search -->
+            <div id="search-block" class="bg-white dark:bg-gray-800 shadow-xl rounded-2xl p-6">
+                <h2 class="text-xl font-semibold mb-4">Search for a City</h2>
                 <div class="flex flex-col sm:flex-row gap-3">
-                    <input id="cityInput" type="text" placeholder="Enter city name..." 
-                           class="w-full px-4 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 focus:ring-2 focus:ring-blue-400">
-                    
+                    <input id="cityInput" type="text" placeholder="Enter city name..." class="w-full px-4 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 focus:ring-2 focus:ring-blue-400">
                     <select id="unitSelect" class="px-3 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600">
                         <option value="celsius">°C</option>
                         <option value="fahrenheit">°F</option>
                     </select>
-
-                    <button id="fetchWeatherBtn" class="px-5 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-                        Search
-                    </button>
+                    <button id="fetchWeatherBtn" class="px-5 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">Search</button>
                 </div>
                 <div id="errorBox" class="hidden bg-red-100 text-red-700 p-3 rounded-lg mt-4"></div>
-            </section>
-
-            <!-- Loader -->
-            <div id="loader" class="hidden text-center my-8">
-                <div class="animate-spin h-10 w-10 border-4 border-blue-500 border-t-transparent rounded-full mx-auto"></div>
-                <p class="mt-2 text-gray-600 dark:text-gray-400">Fetching weather...</p>
+                <!-- Loader -->
+                <div id="loader" class="hidden text-center my-8">
+                    <div class="animate-spin h-10 w-10 border-4 border-blue-500 border-t-transparent rounded-full mx-auto"></div>
+                    <p class="mt-2 text-gray-600 dark:text-gray-400">Fetching weather...</p>
+                </div>
             </div>
 
-            <!-- Weather Display Sections -->
-            <div id="weatherDisplay" class="hidden">
-                
-                <!-- Section 2: Current Weather -->
+            <!-- Block 2: Weather Overview -->
+            <div id="weather-block" class="hidden bg-white dark:bg-gray-800 shadow-xl rounded-2xl p-6">
+                <!-- Current Weather -->
                 <section id="current-weather-section" class="text-center mb-8">
                     <h2 class="text-4xl font-bold" id="cityName"></h2>
                     <p class="text-gray-500 dark:text-gray-400 mb-4" id="countryName"></p>
-                    
-                    <div class="flex items-center justify-center gap-4 bg-blue-100 dark:bg-gray-700 p-6 rounded-xl">
+                    <div class="flex items-center justify-center gap-4 bg-blue-100 dark:bg-gray-700 p-6 rounded-xl max-w-md mx-auto">
                         <div class="text-6xl" id="currentIcon"></div>
                         <div class="text-left">
                             <p class="text-5xl font-semibold"><span id="currentTemp"></span>°</p>
@@ -66,82 +60,80 @@
                     </div>
                 </section>
 
-                <!-- Section 3: 7-Day Forecast -->
+                <!-- 7-Day Forecast List -->
                 <section id="forecast-section">
                     <h3 class="text-2xl font-semibold mb-4 text-center sm:text-left">7-Day Forecast</h3>
-                    <div id="forecast" class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3 text-center">
-                        <!-- Forecast cards will be injected here -->
+                    <div id="forecast" class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-7 gap-3 text-center">
+                        <!-- Forecast cards injected here -->
                     </div>
                 </section>
+            </div>
 
+            <!-- Block 3: Detailed Forecast -->
+            <div id="detail-block" class="hidden bg-white dark:bg-gray-800 shadow-xl rounded-2xl p-6">
+                <h3 class="text-2xl font-semibold mb-4">Details</h3>
+                <div id="detail-content">
+                    <p class="font-bold text-xl mb-2" id="detail-date"></p>
+                    <div class="flex items-center gap-4 mb-4 p-4 bg-gray-100 dark:bg-gray-700 rounded-xl">
+                        <p class="text-5xl" id="detail-icon"></p>
+                        <div>
+                            <p class="text-2xl font-semibold" id="detail-temp"></p>
+                            <p class="text-gray-600 dark:text-gray-300" id="detail-desc"></p>
+                        </div>
+                    </div>
+                    <div class="space-y-2 text-sm">
+                        <p><strong>Wind:</strong> <span id="detail-wind">N/A</span></p>
+                        <p><strong>Humidity:</strong> <span id="detail-humidity">N/A</span></p>
+                    </div>
+                </div>
             </div>
         </main>
     </div>
 
     <script>
         // --- DOM Elements ---
-        const cityInput = document.getElementById("cityInput");
-        const unitSelect = document.getElementById("unitSelect");
-        const fetchWeatherBtn = document.getElementById("fetchWeatherBtn");
-        const loader = document.getElementById("loader");
-        const errorBox = document.getElementById("errorBox");
-        const weatherDisplay = document.getElementById("weatherDisplay");
-        const themeToggle = document.getElementById('theme-toggle');
-        const themeIcon = document.getElementById('theme-icon');
+        const cityInput = document.getElementById("cityInput"), unitSelect = document.getElementById("unitSelect"),
+              fetchWeatherBtn = document.getElementById("fetchWeatherBtn"), loader = document.getElementById("loader"),
+              errorBox = document.getElementById("errorBox"), themeToggle = document.getElementById('theme-toggle'), 
+              themeIcon = document.getElementById('theme-icon'), forecastDiv = document.getElementById("forecast"),
+              searchBlock = document.getElementById('search-block'), weatherBlock = document.getElementById('weather-block'),
+              detailBlock = document.getElementById('detail-block');
+
+        // --- State ---
+        let forecastData = [];
 
         // --- Weather Icons ---
-        const icons = {
-            "Clear sky": "☀️", "Mainly clear": "🌤", "Partly cloudy": "⛅", "Overcast": "☁️",
-            "Fog": "🌫", "Light rain": "🌧", "Moderate rain": "🌧", "Heavy rain": "🌧",
-            "Light snow": "❄️", "Moderate snow": "❄️", "Rain showers": "🌦", "Snow showers": "🌨️",
-            "Thunderstorm": "⛈️"
-        };
+        const icons = { "Clear sky": "☀️", "Mainly clear": "🌤", "Partly cloudy": "⛅", "Overcast": "☁️", "Fog": "🌫", "Light rain": "🌧", "Moderate rain": "🌧", "Heavy rain": "🌧", "Light snow": "❄️", "Moderate snow": "❄️", "Rain showers": "🌦", "Snow showers": "🌨️", "Thunderstorm": "⛈️" };
         const defaultIcon = "🌡️";
 
         // --- Theme Toggle ---
         themeToggle.addEventListener('click', () => {
             const html = document.documentElement;
             html.classList.toggle('dark');
-            
-            if (html.classList.contains('dark')) {
-                themeIcon.textContent = '☀️'; // Sun icon for dark mode
-            } else {
-                themeIcon.textContent = '🌙'; // Moon icon for light mode
-            }
+            themeIcon.textContent = html.classList.contains('dark') ? '☀️' : '🌙';
         });
 
         // --- Event Listeners ---
         fetchWeatherBtn.addEventListener("click", fetchWeather);
-        cityInput.addEventListener("keypress", (e) => {
-            if (e.key === "Enter") fetchWeather();
-        });
+        cityInput.addEventListener("keypress", (e) => e.key === "Enter" && fetchWeather());
 
         // --- Functions ---
         async function fetchWeather() {
             const city = cityInput.value.trim();
-            const unit = unitSelect.value;
-
-            if (!city) {
-                showError("Please enter a city name.");
-                return;
-            }
+            if (!city) { showError("Please enter a city name."); return; }
 
             showLoader(true);
             showError(null);
-            weatherDisplay.classList.add("hidden");
+            weatherBlock.classList.add("hidden");
+            detailBlock.classList.add("hidden");
 
             try {
-                const res = await fetch(`/api/current_weather/?city=${city}&unit=${unit}`);
+                const res = await fetch(`/api/current_weather/?city=${city}&unit=${unitSelect.value}`);
                 if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
                 const data = await res.json();
-
-                if (data.error) {
-                    showError(data.error);
-                } else {
-                    displayWeather(data);
-                }
+                data.error ? showError(data.error) : displayWeather(data);
             } catch (error) {
-                showError("An error occurred while fetching data. Please try again.");
+                showError("An error occurred. Please try again.");
                 console.error("Fetch Error:", error);
             } finally {
                 showLoader(false);
@@ -149,29 +141,22 @@
         }
 
         function showError(msg) {
-            if (msg) {
-                errorBox.textContent = msg;
-                errorBox.classList.remove("hidden");
-            } else {
-                errorBox.classList.add("hidden");
-            }
+            errorBox.classList.toggle("hidden", !msg);
+            if (msg) errorBox.textContent = msg;
         }
 
         function showLoader(isLoading) {
-            if (isLoading) {
-                loader.classList.remove("hidden");
-            } else {
-                loader.classList.add("hidden");
-            }
+            loader.classList.toggle("hidden", !isLoading);
         }
 
         function findIcon(description) {
-            const key = Object.keys(icons).find(k => description.includes(k)) || defaultIcon;
-            return icons[key];
+            const key = Object.keys(icons).find(k => description.includes(k));
+            return key ? icons[key] : defaultIcon;
         }
 
         function displayWeather(data) {
-            weatherDisplay.classList.remove("hidden");
+            weatherBlock.classList.remove("hidden");
+            forecastData = data.forecast;
 
             // Current Weather
             document.getElementById("cityName").textContent = data.city;
@@ -180,26 +165,42 @@
             document.getElementById("currentDesc").textContent = data.current.weather_description;
             document.getElementById("currentIcon").textContent = findIcon(data.current.weather_description);
 
-            // Forecast
-            const forecastDiv = document.getElementById("forecast");
-            forecastDiv.innerHTML = ""; 
-
-            data.forecast.forEach(day => {
+            // 7-Day Forecast
+            forecastDiv.innerHTML = "";
+            data.forecast.forEach((day, index) => {
                 const card = document.createElement("div");
-                card.className = "p-3 bg-gray-100 dark:bg-gray-700 rounded-lg shadow-sm flex flex-col items-center";
+                card.className = "p-3 bg-gray-100 dark:bg-gray-600 rounded-lg shadow-sm flex flex-col items-center cursor-pointer transition-all duration-200 hover:scale-105";
+                card.setAttribute('onclick', `displayDayDetails(${index})`);
                 
                 const dayName = new Date(day.date).toLocaleDateString('en-US', { weekday: 'short' });
-
                 card.innerHTML = `
                     <p class="font-semibold text-sm">${dayName}</p>
                     <p class="text-3xl my-1">${findIcon(day.description)}</p>
                     <div class="text-xs">
-                        <span class="font-bold">${Math.round(day.max)}°</span>
-                        <span>/ ${Math.round(day.min)}°</span>
+                        <span class="font-bold">${Math.round(day.max)}°</span> / ${Math.round(day.min)}°
                     </div>
                 `;
                 forecastDiv.appendChild(card);
             });
+        }
+
+        function displayDayDetails(index) {
+            detailBlock.classList.remove("hidden");
+
+            // Highlight selected card
+            Array.from(forecastDiv.children).forEach((child, i) => {
+                child.classList.toggle('ring-2', i === index);
+                child.classList.toggle('ring-blue-500', i === index);
+            });
+
+            const day = forecastData[index];
+            
+            document.getElementById('detail-date').textContent = new Date(day.date).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
+            document.getElementById('detail-icon').textContent = findIcon(day.description);
+            document.getElementById('detail-temp').innerHTML = `<span class="font-bold">${Math.round(day.max)}°</span> / ${Math.round(day.min)}°`;
+            document.getElementById('detail-desc').textContent = day.description;
+            document.getElementById('detail-wind').textContent = day.wind || 'N/A';
+            document.getElementById('detail-humidity').textContent = day.humidity || 'N/A';
         }
     </script>
 
