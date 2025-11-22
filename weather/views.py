@@ -53,7 +53,7 @@ def current_weather(request):
         f"?latitude={lat}&longitude={lon}"
         f"&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,visibility,wind_speed_10m"
         f"&hourly=temperature_2m,weather_code"
-        f"&daily=weather_code,temperature_2m_max,temperature_2m_min,uv_index_max"
+        f"&daily=weather_code,temperature_2m_max,temperature_2m_min,uv_index_max,apparent_temperature_max,apparent_temperature_min,wind_speed_10m_max"
         f"&timezone=auto&temperature_unit={unit_param}"
     )
     weather_data = requests.get(forecast_url).json()
@@ -103,7 +103,11 @@ def current_weather(request):
             "max_temp": round(daily["temperature_2m_max"][i]),
             "min_temp": round(daily["temperature_2m_min"][i]),
             "description": WMO_CODES.get(daily["weather_code"][i], "Clear"),
-             "main": WMO_CODES.get(daily["weather_code"][i], "Clear"),
+            "main": WMO_CODES.get(daily["weather_code"][i], "Clear"),
+            "apparent_max": round(daily["apparent_temperature_max"][i]),
+            "apparent_min": round(daily["apparent_temperature_min"][i]),
+            "wind_speed": round(daily["wind_speed_10m_max"][i]),
+            "uv_index": daily["uv_index_max"][i]
         })
 
     return Response({

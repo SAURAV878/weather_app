@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Advanced Weather App</title>
+    <title>Weather App</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <script>
@@ -36,7 +36,7 @@
         .hourly-scroll { -ms-overflow-style: none; scrollbar-width: none; }
     </style>
 </head>
-<body class="bg-light-bg dark:bg-dark-bg text-light-text dark:text-dark-text font-sans transition-colors duration-300">
+<body class="bg-light-bg dark:bg-dark-bg text-light-text dark:text-dark-text font-sans transition-colors duration-300 overflow-x-hidden">
 
     <div class="max-w-screen-xl mx-auto p-4 sm:p-6 lg:p-8">
         <!-- HEADER -->
@@ -116,53 +116,47 @@
                     </div>
 
                     <!-- 7-DAY & DETAILS GRID -->
-                </div>
-            </div>
+                    <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+                        <!-- 7-DAY FORECAST -->
+                        <div class="xl:col-span-2 bg-light-card dark:bg-dark-card p-6 rounded-2xl shadow-md">
+                            <h3 class="text-lg font-semibold mb-4">7-Day Forecast</h3>
+                            <div id="forecast-list" class="space-y-3"></div>
+                        </div>
 
-            <!-- DAILY DETAIL BLOCK - Initially Hidden -->
-            <div id="daily-detail-block" class="hidden lg:col-span-1 xl:col-span-1 bg-light-card dark:bg-dark-card p-6 rounded-2xl shadow-md space-y-4">
-                <h3 class="text-lg font-semibold">Day Details</h3>
-                <div class="flex justify-between items-center">
-                    <span class="text-gray-500 dark:text-gray-400">Date</span>
-                    <span id="detail-date" class="font-semibold">--</span>
-                </div>
-                <div class="flex justify-between items-center">
-                    <span class="text-gray-500 dark:text-gray-400">Description</span>
-                    <span id="detail-description" class="font-semibold">--</span>
-                </div>
-                <div class="flex justify-between items-center">
-                    <span class="text-gray-500 dark:text-gray-400">Max Temp</span>
-                    <span id="detail-max-temp" class="font-semibold">--°</span>
-                </div>
-                <div class="flex justify-between items-center">
-                    <span class="text-gray-500 dark:text-gray-400">Min Temp</span>
-                    <span id="detail-min-temp" class="font-semibold">--°</span>
-                </div>
-                <div class="flex justify-between items-center">
-                    <span class="text-gray-500 dark:text-gray-400">Feels Like</span>
-                    <span id="detail-feels-like" class="font-semibold">--°</span>
-                </div>
-                <div class="flex justify-between items-center">
-                    <span class="text-gray-500 dark:text-gray-400">Wind</span>
-                    <span id="detail-wind" class="font-semibold">-- km/h</span>
-                </div>
-                 <div class="flex justify-between items-center">
-                    <span class="text-gray-500 dark:text-gray-400">Humidity</span>
-                    <span id="detail-humidity" class="font-semibold">--%</span>
-                </div>
-                 <div class="flex justify-between items-center">
-                    <span class="text-gray-500 dark:text-gray-400">Visibility</span>
-                    <span id="detail-visibility" class="font-semibold">-- km</span>
-                </div>
-                <div class="flex justify-between items-center">
-                    <span class="text-gray-500 dark:text-gray-400">UV Index</span>
-                    <span id="detail-uv" class="font-semibold">--</span>
-                </div>
-                <div class="flex justify-between items-center">
-                    <span class="text-gray-500 dark:text-gray-400">Air Quality</span>
-                    <span id="detail-aqi" class="font-semibold">--</span>
-                </div>
-            </div>
+                        <!-- MORE DETAILS -->
+                        <div class="bg-light-card dark:bg-dark-card p-6 rounded-2xl shadow-md space-y-4">
+                            <h3 id="details-toggle" class="text-lg font-semibold cursor-pointer flex justify-between items-center">
+                                <span>Details</span>
+                                <i id="details-arrow" class="fas fa-chevron-down transition-transform"></i>
+                            </h3>
+                            <div id="details-content" class="hidden pt-4 space-y-4 border-t border-gray-200 dark:border-gray-700">
+                                 <div class="flex justify-between items-center">
+                                    <span class="text-gray-500 dark:text-gray-400">Feels Like</span>
+                                    <span id="detail-feels-like" class="font-semibold">--°</span>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-gray-500 dark:text-gray-400">Wind</span>
+                                    <span id="detail-wind" class="font-semibold">-- km/h</span>
+                                </div>
+                                 <div class="flex justify-between items-center">
+                                    <span class="text-gray-500 dark:text-gray-400">Humidity</span>
+                                    <span id="detail-humidity" class="font-semibold">--%</span>
+                                </div>
+                                 <div class="flex justify-between items-center">
+                                    <span class="text-gray-500 dark:text-gray-400">Visibility</span>
+                                    <span id="detail-visibility" class="font-semibold">-- km</span>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-gray-500 dark:text-gray-400">UV Index</span>
+                                    <span id="detail-uv" class="font-semibold">--</span>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-gray-500 dark:text-gray-400">Air Quality</span>
+                                    <span id="detail-aqi" class="font-semibold">--</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
                     <!-- ALERTS -->
                     <div id="alert-section" class="hidden bg-yellow-100 dark:bg-yellow-900/50 border-l-4 border-yellow-500 text-yellow-700 dark:text-yellow-300 p-4 rounded-lg shadow-md">
@@ -216,6 +210,17 @@ document.addEventListener('DOMContentLoaded', () => {
         unitSelect.addEventListener('change', () => {
             if(currentCity) fetchWeather(currentCity);
         });
+
+        // The details section will now be controlled by clicking on a daily forecast item
+        // const detailsToggle = document.getElementById('details-toggle');
+        const detailsContent = document.getElementById('details-content');
+        const detailsArrow = document.getElementById('details-arrow');
+        detailsArrow.classList.remove('rotate-180'); // Ensure arrow points down initially
+
+        // detailsToggle.addEventListener('click', () => {
+        //     detailsContent.classList.toggle('hidden');
+        //     detailsArrow.classList.toggle('rotate-180');
+        // });
     };
 
     // --- Theme Management ---
@@ -281,26 +286,16 @@ document.addEventListener('DOMContentLoaded', () => {
         showLoader(true);
         showError(null);
 
-        try {
-            const unit = unitSelect.value;
-            const response = await fetch(`/current_weather/?city=${encodeURIComponent(city)}&unit=${unit}`);
-            
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
-            }
-
-            const data = await response.json();
-            displayWeather(data);
+        // Placeholder for backend API call
+        // In a real app, you would fetch from your backend: `/api/weather?city=${city}&unit=${unitSelect.value}`
+        // For now, we'll simulate a successful response with mock data after a short delay.
+        setTimeout(() => {
+            const mockData = generateMockData(city);
+            displayWeather(mockData);
             localStorage.setItem('lastWeatherSearch', city);
             currentCity = city;
-
-        } catch (error) {
-            console.error("Fetch error:", error);
-            showError(error.message);
-        } finally {
             showLoader(false);
-        }
+        }, 1000);
     }
     
     // --- Location Management ---
@@ -330,6 +325,15 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- Display Functions ---
+    const updateDetails = (details) => {
+        document.getElementById('detail-feels-like').textContent = `${details.feels_like}°`;
+        document.getElementById('detail-wind').textContent = `${details.wind_speed} km/h`;
+        document.getElementById('detail-humidity').textContent = `${details.humidity}%`;
+        document.getElementById('detail-visibility').textContent = `${details.visibility} km`;
+        document.getElementById('detail-uv').textContent = details.uv_index;
+        document.getElementById('detail-aqi').textContent = `${details.aqi} - ${getAqiLabel(details.aqi)}`;
+    };
+
     const displayWeather = (data) => {
         // Current Weather
         document.getElementById("cityName").textContent = data.city;
@@ -338,13 +342,8 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById("currentDesc").textContent = data.current.description;
         document.getElementById("currentIcon").className = `text-6xl text-yellow-400 fas ${findIcon(data.current.main)}`;
 
-        // Details
-        document.getElementById('detail-feels-like').textContent = `${data.details.feels_like}°`;
-        document.getElementById('detail-wind').textContent = `${data.details.wind_speed} km/h`;
-        document.getElementById('detail-humidity').textContent = `${data.details.humidity}%`;
-        document.getElementById('detail-visibility').textContent = `${data.details.visibility} km`;
-        document.getElementById('detail-uv').textContent = data.details.uv_index;
-        document.getElementById('detail-aqi').textContent = `${data.details.aqi} - ${getAqiLabel(data.details.aqi)}`;
+        // Initial Details
+        updateDetails(data.details);
 
         // Hourly
         hourlyForecastDiv.innerHTML = "";
@@ -362,7 +361,7 @@ document.addEventListener('DOMContentLoaded', () => {
         forecastListDiv.innerHTML = "";
         data.daily.forEach(day => {
             const item = document.createElement("div");
-            item.className = "grid grid-cols-4 items-center gap-2";
+            item.className = "grid grid-cols-4 items-center gap-2 cursor-pointer hover:bg-light-bg dark:hover:bg-dark-bg rounded-lg p-2";
             item.innerHTML = `
                 <p class="font-medium col-span-1">${day.day}</p>
                 <div class="col-span-1 flex items-center gap-2">
@@ -373,6 +372,15 @@ document.addEventListener('DOMContentLoaded', () => {
                     <span class="font-semibold">${day.max_temp}°</span> / 
                     <span class="text-gray-500 dark:text-gray-400">${day.min_temp}°</span>
                 </div>`;
+            item.addEventListener('click', () => {
+                updateDetails(day.details);
+                // Optionally open the details section if it's closed
+                const detailsContent = document.getElementById('details-content');
+                if (detailsContent.classList.contains('hidden')) {
+                    detailsContent.classList.remove('hidden');
+                    document.getElementById('details-arrow').classList.add('rotate-180');
+                }
+            });
             forecastListDiv.appendChild(item);
         });
         
@@ -397,6 +405,54 @@ document.addEventListener('DOMContentLoaded', () => {
         if (aqi <= 200) return "Unhealthy";
         if (aqi <= 300) return "Very Unhealthy";
         return "Hazardous";
+    };
+
+    // --- Mock Data Generator ---
+    const generateMockData = (city) => {
+        const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+        const weather = ["Clear", "Clouds", "Rain", "Snow"];
+        const now = new Date();
+        return {
+            city: city.charAt(0).toUpperCase() + city.slice(1),
+            country: city.toLowerCase() === 'newyork' ? 'USA' : 'Country',
+            current: {
+                temp: Math.floor(Math.random() * 20 + 10),
+                description: "Partly Cloudy",
+                main: "Clouds",
+            },
+            details: {
+                feels_like: Math.floor(Math.random() * 20 + 9),
+                wind_speed: (Math.random() * 20).toFixed(1),
+                humidity: Math.floor(Math.random() * 50 + 40),
+                visibility: (Math.random() * 10).toFixed(1),
+                uv_index: Math.floor(Math.random() * 11),
+                aqi: Math.floor(Math.random() * 200),
+            },
+            hourly: Array.from({ length: 12 }, (_, i) => ({
+                time: `${(now.getHours() + i + 1) % 24}:00`,
+                main: weather[Math.floor(Math.random() * weather.length)] ,
+                temp: Math.floor(Math.random() * 20 + 10),
+            })),
+            daily: Array.from({ length: 7 }, (_, i) => {
+                const dayIndex = (now.getDay() + i) % 7;
+                return {
+                    day: days[dayIndex],
+                    description: weather[Math.floor(Math.random() * weather.length)],
+                    main: weather[Math.floor(Math.random() * weather.length)],
+                    max_temp: Math.floor(Math.random() * 15 + 15),
+                    min_temp: Math.floor(Math.random() * 10 + 5),
+                    details: {
+                        feels_like: Math.floor(Math.random() * 20 + 9),
+                        wind_speed: (Math.random() * 20).toFixed(1),
+                        humidity: Math.floor(Math.random() * 50 + 40),
+                        visibility: (Math.random() * 10).toFixed(1),
+                        uv_index: Math.floor(Math.random() * 11),
+                        aqi: Math.floor(Math.random() * 200),
+                    }
+                };
+            }),
+            alerts: Math.random() > 0.8 ? ["High wind warning for coastal areas."] : []
+        };
     };
 
     init();
