@@ -2,104 +2,103 @@
 <html lang="en" class="light">
 <head>
     <meta charset="UTF-8">
-    <title>Advanced Weather App</title>
+    <title>Ultimate Weather App</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
-        tailwind.config = {
-            darkMode: 'class',
-        }
+        tailwind.config = { darkMode: 'class' }
     </script>
     <style>
         @keyframes fade-slide-in {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
-        .animate-fade-slide-in {
-            animation: fade-slide-in 0.5s ease-out forwards;
-        }
+        .animate-fade-slide-in { animation: fade-slide-in 0.5s ease-out forwards; }
+        .hourly-scroll::-webkit-scrollbar { height: 4px; }
+        .hourly-scroll::-webkit-scrollbar-thumb { background-color: rgba(156, 163, 175, 0.5); border-radius: 10px; }
     </style>
 </head>
 
 <body class="bg-gradient-to-br from-sky-200 via-blue-300 to-indigo-400 dark:from-gray-800 dark:via-gray-900 dark:to-black text-gray-900 dark:text-gray-100 transition-colors duration-500 min-h-screen p-4 sm:p-6">
 
     <div class="max-w-7xl mx-auto">
-
-        <!-- Header -->
         <header class="flex justify-between items-center mb-8">
-            <h1 class="text-4xl font-bold text-white drop-shadow-lg">🌦 Advanced Weather</h1>
+            <h1 class="text-4xl font-bold text-white drop-shadow-lg">🌦 Ultimate Weather</h1>
             <button id="theme-toggle" class="px-3 py-2 rounded-full bg-white/30 dark:bg-gray-700/50 text-xl backdrop-blur-sm hover:bg-white/50 transition">
                 <span id="theme-icon">🌙</span>
             </button>
         </header>
 
-        <!-- Main Content Grid -->
         <main class="grid grid-cols-1 lg:grid-cols-5 gap-6">
-
             <!-- Left Column -->
             <div class="lg:col-span-2 space-y-6">
-                <!-- Block 1: Search -->
                 <div class="bg-white/60 dark:bg-gray-800/60 backdrop-blur-lg shadow-xl rounded-2xl p-6">
-                    <h2 class="text-xl font-semibold mb-4">Search for a City</h2>
-                    <div class="flex flex-col sm:flex-row gap-3">
-                        <input id="cityInput" type="text" placeholder="Enter city name..." class="w-full px-4 py-2 border-transparent rounded-lg dark:bg-gray-700 focus:ring-2 focus:ring-blue-400 transition">
-                        <select id="unitSelect" class="px-3 py-2 border-transparent rounded-lg dark:bg-gray-700 focus:ring-2 focus:ring-blue-400">
-                            <option value="celsius">°C</option>
-                            <option value="fahrenheit">°F</option>
-                        </select>
-                        <button id="fetchWeatherBtn" class="px-5 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-transform hover:scale-105">Search</button>
+                    <h2 class="text-xl font-semibold mb-4">Search</h2>
+                    <div class="flex flex-col gap-3">
+                        <div class="flex gap-3">
+                            <input id="cityInput" type="text" placeholder="Enter city name..." class="w-full px-4 py-2 border-transparent rounded-lg dark:bg-gray-700 focus:ring-2 focus:ring-blue-400 transition">
+                            <select id="unitSelect" class="px-3 py-2 border-transparent rounded-lg dark:bg-gray-700 focus:ring-2 focus:ring-blue-400">
+                                <option value="celsius">°C</option>
+                                <option value="fahrenheit">°F</option>
+                            </select>
+                        </div>
+                        <div class="flex gap-3">
+                             <button id="fetchWeatherBtn" class="w-full px-5 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-transform hover:scale-105">Search</button>
+                             <button id="geoBtn" class="w-full px-5 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-transform hover:scale-105">Use My Location</button>
+                        </div>
                     </div>
                     <div id="errorBox" class="hidden bg-red-100/80 text-red-700 p-3 rounded-lg mt-4"></div>
-                    <div id="loader" class="hidden text-center pt-4">
-                        <div class="animate-spin h-8 w-8 border-4 border-blue-500 border-t-transparent rounded-full mx-auto"></div>
-                    </div>
+                    <div id="loader" class="hidden text-center pt-4"><div class="animate-spin h-8 w-8 border-4 border-blue-500 border-t-transparent rounded-full mx-auto"></div></div>
                 </div>
 
-                <!-- Block 3: Detailed Forecast -->
-                <div id="detail-block" class="hidden opacity-0 bg-white/60 dark:bg-gray-800/60 backdrop-blur-lg shadow-xl rounded-2xl p-6">
-                    <h3 class="text-2xl font-semibold mb-4">Details</h3>
-                    <div id="detail-content">
-                        <p class="font-bold text-xl mb-2" id="detail-date"></p>
-                        <div class="flex items-center gap-4 mb-4 p-4 bg-gray-100/70 dark:bg-gray-700/70 rounded-xl">
-                            <p class="text-5xl" id="detail-icon"></p>
-                            <div>
-                                <p class="text-2xl font-semibold" id="detail-temp"></p>
-                                <p class="text-gray-600 dark:text-gray-300" id="detail-desc"></p>
-                            </div>
-                        </div>
-                        <div class="space-y-2 text-sm">
-                            <p><strong>Wind:</strong> <span id="detail-wind">N/A</span></p>
-                            <p><strong>Humidity:</strong> <span id="detail-humidity">N/A</span></p>
-                        </div>
-                    </div>
+                <div id="forecast-list-block" class="hidden opacity-0 bg-white/60 dark:bg-gray-800/60 backdrop-blur-lg shadow-xl rounded-2xl p-6">
+                    <h3 class="text-2xl font-semibold mb-4">7-Day Forecast</h3>
+                    <div id="forecast" class="grid grid-cols-4 sm:grid-cols-7 gap-2 text-center mb-4"></div>
+                    <canvas id="temp-chart"></canvas>
                 </div>
             </div>
 
-            <!-- Right Column: Weather Overview -->
-            <div id="weather-block" class="hidden opacity-0 lg:col-span-3 bg-white/60 dark:bg-gray-800/60 backdrop-blur-lg shadow-xl rounded-2xl p-6">
-                <!-- Current Weather -->
-                <section class="text-center mb-8">
-                    <h2 class="text-5xl font-bold" id="cityName"></h2>
-                    <p class="text-gray-500 dark:text-gray-400 mb-4" id="countryName"></p>
-                    <div class="flex items-center justify-center gap-6 bg-blue-100/70 dark:bg-gray-700/70 p-6 rounded-2xl max-w-md mx-auto">
-                        <div class="text-7xl" id="currentIcon"></div>
-                        <div class="text-left">
-                            <p class="text-6xl font-semibold"><span id="currentTemp"></span>°</p>
-                            <p class="text-xl text-gray-700 dark:text-gray-300" id="currentDesc"></p>
+            <!-- Right Column -->
+            <div class="lg:col-span-3 space-y-6">
+                <div id="current-weather-block" class="hidden opacity-0 bg-white/60 dark:bg-gray-800/60 backdrop-blur-lg shadow-xl rounded-2xl p-6">
+                    <section class="text-center">
+                        <h2 class="text-5xl font-bold" id="cityName"></h2>
+                        <p class="text-gray-500 dark:text-gray-400 mb-4" id="countryName"></p>
+                        <div class="flex items-center justify-center gap-6 bg-blue-100/70 dark:bg-gray-700/70 p-6 rounded-2xl max-w-md mx-auto">
+                            <div class="text-7xl" id="currentIcon"></div>
+                            <div class="text-left">
+                                <p class="text-6xl font-semibold"><span id="currentTemp"></span>°</p>
+                                <p class="text-xl text-gray-700 dark:text-gray-300" id="currentDesc"></p>
+                            </div>
+                        </div>
+                    </section>
+                    <section id="hourly-forecast-section" class="mt-6">
+                        <h3 class="text-xl font-semibold mb-3">Hourly Forecast</h3>
+                        <div id="hourly-forecast" class="flex overflow-x-auto gap-3 pb-3 hourly-scroll"></div>
+                    </section>
+                </div>
+
+                <div id="detail-block" class="hidden opacity-0 bg-white/60 dark:bg-gray-800/60 backdrop-blur-lg shadow-xl rounded-2xl p-6">
+                    <h3 class="text-2xl font-semibold mb-4">Day Details</h3>
+                    <div id="detail-content">
+                        <p class="font-bold text-xl mb-2" id="detail-date"></p>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div class="flex items-center gap-4 p-4 bg-gray-100/70 dark:bg-gray-700/70 rounded-xl">
+                                <p class="text-5xl" id="detail-icon"></p>
+                                <div>
+                                    <p class="text-2xl font-semibold" id="detail-temp"></p>
+                                    <p class="text-gray-600 dark:text-gray-300" id="detail-desc"></p>
+                                </div>
+                            </div>
+                            <div class="p-4 bg-gray-100/70 dark:bg-gray-700/70 rounded-xl space-y-2 text-sm">
+                                <p><strong>Feels Like:</strong> <span id="detail-feels-like">N/A</span></p>
+                                <p><strong>UV Index:</strong> <span id="detail-uv">N/A</span></p>
+                                <p><strong>Sunrise:</strong> <span id="detail-sunrise">N/A</span></p>
+                                <p><strong>Sunset:</strong> <span id="detail-sunset">N/A</span></p>
+                            </div>
                         </div>
                     </div>
-                </section>
-
-                <!-- 7-Day Forecast List -->
-                <section>
-                    <h3 class="text-2xl font-semibold mb-4 text-center sm:text-left">7-Day Forecast</h3>
-                    <div id="forecast" class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-7 gap-3 text-center"></div>
-                </section>
+                </div>
             </div>
         </main>
     </div>
@@ -107,26 +106,157 @@
     <script>
         // --- DOM Elements ---
         const cityInput = document.getElementById("cityInput"), unitSelect = document.getElementById("unitSelect"),
-              fetchWeatherBtn = document.getElementById("fetchWeatherBtn"), loader = document.getElementById("loader"),
-              errorBox = document.getElementById("errorBox"), themeToggle = document.getElementById('theme-toggle'), 
-              themeIcon = document.getElementById('theme-icon'), forecastDiv = document.getElementById("forecast"),
-              weatherBlock = document.getElementById('weather-block'), detailBlock = document.getElementById('detail-block');
+              fetchWeatherBtn = document.getElementById("fetchWeatherBtn"), geoBtn = document.getElementById("geoBtn"),
+              loader = document.getElementById("loader"), errorBox = document.getElementById("errorBox"),
+              themeToggle = document.getElementById('theme-toggle'), themeIcon = document.getElementById('theme-icon'),
+              forecastDiv = document.getElementById("forecast"), hourlyForecastDiv = document.getElementById('hourly-forecast'),
+              forecastListBlock = document.getElementById('forecast-list-block'),
+              currentWeatherBlock = document.getElementById('current-weather-block'),
+              detailBlock = document.getElementById('detail-block');
 
-        let forecastData = [];
+        // --- State & Config ---
+        let forecastData = [], hourlyData = [], tempChart = null;
         const icons = { "Clear sky": "☀️", "Mainly clear": "🌤", "Partly cloudy": "⛅", "Overcast": "☁️", "Fog": "🌫", "Light rain": "🌧", "Moderate rain": "🌧", "Heavy rain": "🌧", "Light snow": "❄️", "Moderate snow": "❄️", "Rain showers": "🌦", "Snow showers": "🌨️", "Thunderstorm": "⛈️" };
         const defaultIcon = "🌡️";
 
-        // --- Theme Toggle ---
-        themeToggle.addEventListener('click', () => {
-            document.documentElement.classList.toggle('dark');
-            themeIcon.textContent = document.documentElement.classList.contains('dark') ? '☀️' : '🌙';
+        // --- Initializer ---
+        document.addEventListener('DOMContentLoaded', () => {
+            const lastSearch = JSON.parse(localStorage.getItem('lastWeatherSearch'));
+            if (lastSearch) {
+                fetchWeather(lastSearch);
+            }
+            themeToggle.addEventListener('click', () => {
+                document.documentElement.classList.toggle('dark');
+                themeIcon.textContent = document.documentElement.classList.contains('dark') ? '☀️' : '🌙';
+            });
+            fetchWeatherBtn.addEventListener("click", () => fetchWeather({ city: cityInput.value.trim() }));
+            cityInput.addEventListener("keypress", (e) => e.key === "Enter" && fetchWeather({ city: cityInput.value.trim() }));
+            geoBtn.addEventListener("click", handleGeolocation);
         });
 
-        // --- Event Listeners ---
-        fetchWeatherBtn.addEventListener("click", fetchWeather);
-        cityInput.addEventListener("keypress", (e) => e.key === "Enter" && fetchWeather());
+        // --- Geolocation ---
+        function handleGeolocation() {
+            if (!navigator.geolocation) {
+                showError("Geolocation is not supported by your browser.");
+                return;
+            }
+            loader.classList.remove("hidden");
+            navigator.geolocation.getCurrentPosition(
+                (pos) => fetchWeather({ lat: pos.coords.latitude, lon: pos.coords.longitude }),
+                () => {
+                    showError("Unable to retrieve your location. Please search for a city manually.");
+                    loader.classList.add("hidden");
+                }
+            );
+        }
 
-        // --- Animation Helper ---
+        // --- Core Functions ---
+        async function fetchWeather(params = {}) {
+            const { city, lat, lon } = params;
+            if (!city && (!lat || !lon)) {
+                showError("Please enter a city name.");
+                return;
+            }
+
+            loader.classList.remove("hidden");
+            showError(null);
+            toggleVisibility(currentWeatherBlock, false);
+            toggleVisibility(forecastListBlock, false);
+            toggleVisibility(detailBlock, false);
+
+            let apiUrl = `/api/current_weather/?unit=${unitSelect.value}`;
+            if (city) apiUrl += `&city=${city}`;
+            else apiUrl += `&lat=${lat}&lon=${lon}`;
+
+            try {
+                const res = await fetch(apiUrl);
+                if (!res.ok) {
+                    const errData = await res.json().catch(() => ({ error: "City not found or network error." }));
+                    throw new Error(errData.error);
+                }
+                const data = await res.json();
+                if (data.error) {
+                    throw new Error(data.error);
+                }
+                displayWeather(data);
+                localStorage.setItem('lastWeatherSearch', JSON.stringify(params));
+            } catch (error) {
+                showError(error.message);
+            } finally {
+                loader.classList.add("hidden");
+            }
+        }
+
+        function displayWeather(data) {
+            toggleVisibility(currentWeatherBlock, true);
+            toggleVisibility(forecastListBlock, true);
+            forecastData = data.forecast || [];
+            hourlyData = data.hourly || [];
+
+            document.getElementById("cityName").textContent = data.city;
+            document.getElementById("countryName").textContent = data.country;
+            document.getElementById("currentTemp").textContent = Math.round(data.current.temperature);
+            document.getElementById("currentDesc").textContent = data.current.weather_description;
+            document.getElementById("currentIcon").textContent = findIcon(data.current.weather_description);
+
+            render7DayForecast(forecastData);
+            renderHourlyForecast(hourlyData);
+            renderTempChart(forecastData);
+        }
+
+        function render7DayForecast(days) {
+            forecastDiv.innerHTML = "";
+            days.forEach((day, index) => {
+                const card = document.createElement("div");
+                card.className = "p-2 bg-white/30 dark:bg-gray-600/50 rounded-lg shadow-md flex flex-col items-center cursor-pointer transition-all duration-300 hover:scale-110 hover:shadow-lg hover:bg-white/50";
+                card.setAttribute('onclick', `displayDayDetails(${index})`);
+                card.innerHTML = `<p class="font-semibold text-sm">${new Date(day.date).toLocaleDateString('en-US', { weekday: 'short' })}</p><p class="text-2xl my-1">${findIcon(day.description)}</p><div class="text-xs"><span class="font-bold">${Math.round(day.max)}°</span>/${Math.round(day.min)}°</div>`;
+                forecastDiv.appendChild(card);
+            });
+        }
+
+        function renderHourlyForecast(hours) {
+            hourlyForecastDiv.innerHTML = "";
+            hours.slice(0, 24).forEach(hour => {
+                const card = document.createElement("div");
+                card.className = "flex-shrink-0 text-center p-2 rounded-lg bg-white/20 dark:bg-gray-700/40";
+                card.innerHTML = `<p class="text-sm">${new Date(hour.time).getHours()}:00</p><p class="text-2xl">${findIcon(hour.description)}</p><p class="font-bold">${Math.round(hour.temperature)}°</p>`;
+                hourlyForecastDiv.appendChild(card);
+            });
+        }
+
+        function renderTempChart(days) {
+            if (tempChart) tempChart.destroy();
+            const ctx = document.getElementById('temp-chart').getContext('2d');
+            tempChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: days.map(d => new Date(d.date).toLocaleDateString('en-US', { weekday: 'short' })),
+                    datasets: [
+                        { label: 'Max Temp', data: days.map(d => d.max), borderColor: 'rgba(255, 99, 132, 1)', backgroundColor: 'rgba(255, 99, 132, 0.2)', tension: 0.3, fill: true },
+                        { label: 'Min Temp', data: days.map(d => d.min), borderColor: 'rgba(54, 162, 235, 1)', backgroundColor: 'rgba(54, 162, 235, 0.2)', tension: 0.3, fill: true }
+                    ]
+                },
+                options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: false } } }
+            });
+        }
+
+        function displayDayDetails(index) {
+            toggleVisibility(detailBlock, true);
+            Array.from(forecastDiv.children).forEach((child, i) => child.classList.toggle('ring-2', i === index));
+
+            const day = forecastData[index];
+            document.getElementById('detail-date').textContent = new Date(day.date).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
+            document.getElementById('detail-icon').textContent = findIcon(day.description);
+            document.getElementById('detail-temp').innerHTML = `<span class="font-bold">${Math.round(day.max)}°</span> / ${Math.round(day.min)}°`;
+            document.getElementById('detail-desc').textContent = day.description;
+            document.getElementById('detail-feels-like').textContent = `${day.feels_like || 'N/A'}°`;
+            document.getElementById('detail-uv').textContent = day.uv_index || 'N/A';
+            document.getElementById('detail-sunrise').textContent = day.sunrise || 'N/A';
+            document.getElementById('detail-sunset').textContent = day.sunset || 'N/A';
+        }
+
+        // --- Helpers ---
         function toggleVisibility(element, show) {
             if (show) {
                 element.classList.remove('hidden', 'opacity-0');
@@ -136,86 +266,14 @@
                 element.classList.remove('animate-fade-slide-in');
             }
         }
-
-        // --- Core Functions ---
-        async function fetchWeather() {
-            const city = cityInput.value.trim();
-            if (!city) { showError("Please enter a city name."); return; }
-
-            loader.classList.remove("hidden");
-            showError(null);
-            toggleVisibility(weatherBlock, false);
-            toggleVisibility(detailBlock, false);
-
-            try {
-                const res = await fetch(`/api/current_weather/?city=${city}&unit=${unitSelect.value}`);
-                if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
-                const data = await res.json();
-                data.error ? showError(data.error) : displayWeather(data);
-            } catch (error) {
-                showError("An error occurred. Please try again.");
-                console.error("Fetch Error:", error);
-            } finally {
-                loader.classList.add("hidden");
-            }
+        function findIcon(description) {
+            const key = Object.keys(icons).find(k => description && description.includes(k));
+            return key ? icons[key] : defaultIcon;
         }
-
         function showError(msg) {
             errorBox.classList.toggle("hidden", !msg);
             if (msg) errorBox.textContent = msg;
         }
-
-        function findIcon(description) {
-            const key = Object.keys(icons).find(k => description.includes(k));
-            return key ? icons[key] : defaultIcon;
-        }
-
-        function displayWeather(data) {
-            toggleVisibility(weatherBlock, true);
-            forecastData = data.forecast;
-
-            document.getElementById("cityName").textContent = data.city;
-            document.getElementById("countryName").textContent = data.country;
-            document.getElementById("currentTemp").textContent = Math.round(data.current.temperature);
-            document.getElementById("currentDesc").textContent = data.current.weather_description;
-            document.getElementById("currentIcon").textContent = findIcon(data.current.weather_description);
-
-            forecastDiv.innerHTML = "";
-            data.forecast.forEach((day, index) => {
-                const card = document.createElement("div");
-                card.className = "p-3 bg-white/30 dark:bg-gray-600/50 rounded-lg shadow-md flex flex-col items-center cursor-pointer transition-all duration-300 hover:scale-110 hover:shadow-lg hover:bg-white/50";
-                card.setAttribute('onclick', `displayDayDetails(${index})`);
-                
-                const dayName = new Date(day.date).toLocaleDateString('en-US', { weekday: 'short' });
-                card.innerHTML = `
-                    <p class="font-semibold text-sm">${dayName}</p>
-                    <p class="text-3xl my-1">${findIcon(day.description)}</p>
-                    <div class="text-xs">
-                        <span class="font-bold">${Math.round(day.max)}°</span> / ${Math.round(day.min)}°
-                    </div>
-                `;
-                forecastDiv.appendChild(card);
-            });
-        }
-
-        function displayDayDetails(index) {
-            toggleVisibility(detailBlock, true);
-
-            Array.from(forecastDiv.children).forEach((child, i) => {
-                child.classList.toggle('ring-2', i === index);
-                child.classList.toggle('ring-blue-400', i === index);
-            });
-
-            const day = forecastData[index];
-            
-            document.getElementById('detail-date').textContent = new Date(day.date).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
-            document.getElementById('detail-icon').textContent = findIcon(day.description);
-            document.getElementById('detail-temp').innerHTML = `<span class="font-bold">${Math.round(day.max)}°</span> / ${Math.round(day.min)}°`;
-            document.getElementById('detail-desc').textContent = day.description;
-            document.getElementById('detail-wind').textContent = day.wind || 'N/A';
-            document.getElementById('detail-humidity').textContent = day.humidity || 'N/A';
-        }
     </script>
-
 </body>
 </html>
