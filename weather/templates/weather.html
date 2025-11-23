@@ -35,107 +35,107 @@
         .skeleton { animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; background-color: rgba(156, 163, 175, 0.2); border-radius: 0.5rem; }
         .hourly-scroll::-webkit-scrollbar { display: none; }
         .hourly-scroll { -ms-overflow-style: none; scrollbar-width: none; }
-        .daily-details {
-            max-height: 0;
-            overflow: hidden;
-            transition: max-height 0.3s ease-out;
+        body {
+            overflow-y: hidden; /* Prevent scrolling on the body */
         }
     </style>
 </head>
-<body class="bg-light-bg dark:bg-dark-bg text-light-text dark:text-dark-text font-sans transition-colors duration-300 overflow-x-hidden">
+<body class="bg-light-bg dark:bg-dark-bg text-light-text dark:text-dark-text font-sans transition-colors duration-300">
 
-    <div class="max-w-screen-xl mx-auto p-4 sm:p-6 lg:p-8">
+    <div class="max-w-screen-xl mx-auto p-4 h-screen flex flex-col">
         <!-- HEADER -->
-        <header class="flex justify-between items-center mb-8">
+        <header class="flex justify-between items-center mb-4">
             <div class="flex items-center gap-3">
-                <i class="fas fa-cloud-sun-rain text-3xl text-accent-blue"></i>
-                <h1 class="text-2xl sm:text-3xl font-bold">Weather</h1>
+                <i class="fas fa-cloud-sun-rain text-xl text-accent-blue"></i>
+                <h1 class="text-xl font-bold">Weather</h1>
             </div>
-            <div class="flex items-center gap-4">
-                <button id="theme-toggle" class="text-xl px-3 py-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
+            <div class="flex items-center gap-2">
+                <button id="theme-toggle" class="text-lg px-2 py-1 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
                     <i class="fas fa-moon"></i>
                 </button>
             </div>
         </header>
 
-        <main class="grid grid-cols-1 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        <main class="grid grid-cols-1 lg:grid-cols-3 xl:grid-cols-4 gap-4 flex-grow">
 
-            <!-- LEFT COLUMN (SEARCH & SAVED LOCATIONS) -->
-            <aside class="lg:col-span-1 xl:col-span-1 space-y-6">
-                <div class="bg-light-card dark:bg-dark-card p-6 rounded-2xl shadow-md">
+            <!-- LEFT COLUMN -->
+            <aside class="lg:col-span-1 xl:col-span-1 flex flex-col gap-4">
+                <div class="bg-light-card dark:bg-dark-card p-3 rounded-2xl shadow-md">
                     <div class="flex gap-2">
-                        <input id="cityInput" type="text" placeholder="Search city..." class="w-full bg-light-bg dark:bg-dark-bg px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent-blue">
-                        <button id="fetchWeatherBtn" class="bg-accent-blue text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"><i class="fas fa-search"></i></button>
+                        <input id="cityInput" type="text" placeholder="Search city..." class="w-full bg-light-bg dark:bg-dark-bg px-3 py-1 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent-blue text-sm">
+                        <button id="fetchWeatherBtn" class="bg-accent-blue text-white px-3 py-1 rounded-lg hover:bg-blue-700 transition-colors text-sm"><i class="fas fa-search"></i></button>
                     </div>
-                    <div id="errorBox" class="hidden bg-red-100 text-red-700 p-3 rounded-lg mt-4 text-sm"></div>
+                    <div id="errorBox" class="hidden bg-red-100 text-red-700 p-2 rounded-lg mt-3 text-xs"></div>
                 </div>
 
-                <div class="bg-light-card dark:bg-dark-card p-6 rounded-2xl shadow-md">
-                    <h2 class="text-lg font-semibold mb-3 flex items-center gap-2"><i class="fas fa-star text-yellow-400"></i> Saved Locations</h2>
-                    <ul id="saved-locations" class="space-y-2">
-                        <li class="text-gray-500 dark:text-gray-400">No saved locations yet.</li>
+                <div class="bg-light-card dark:bg-dark-card p-3 rounded-2xl shadow-md flex-grow flex flex-col">
+                    <h2 class="text-base font-semibold mb-2 flex items-center gap-2"><i class="fas fa-star text-yellow-400"></i> Saved</h2>
+                    <ul id="saved-locations" class="space-y-1 overflow-y-auto text-sm max-h-40">
+                        <li class="text-gray-500 dark:text-gray-400 p-1">No saved locations yet.</li>
                     </ul>
                 </div>
             </aside>
 
-            <!-- MAIN CONTENT (WEATHER DETAILS) -->
-            <div class="lg:col-span-2 xl:col-span-3 space-y-6">
+            <!-- MAIN CONTENT -->
+            <div class="lg:col-span-2 xl:col-span-3 flex flex-col gap-4">
                 <!-- SKELETON LOADER -->
-                <div id="skeleton-loader" class="hidden space-y-6">
-                    <div class="skeleton h-48 w-full"></div>
-                    <div class="skeleton h-64 w-full"></div>
-                    <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
-                        <div class="skeleton h-32"></div>
-                        <div class="skeleton h-32"></div>
-                        <div class="skeleton h-32"></div>
-                        <div class="skeleton h-32"></div>
-                    </div>
+                <div id="skeleton-loader" class="hidden space-y-4">
+                    <div class="skeleton h-24 w-full"></div>
+                    <div class="skeleton h-32 w-full"></div>
+                    <div class="skeleton h-32 w-full"></div>
                 </div>
 
                 <!-- ACTUAL CONTENT -->
-                <div id="weather-content" class="space-y-6 opacity-0">
+                <div id="weather-content" class="h-full flex flex-col gap-4 opacity-0">
                     <!-- CURRENT WEATHER -->
-                    <div class="bg-light-card dark:bg-dark-card p-6 rounded-2xl shadow-md">
-                        <div class="flex flex-col sm:flex-row justify-between items-start">
+                    <div class="bg-light-card dark:bg-dark-card p-3 rounded-2xl shadow-md">
+                        <div class="flex justify-between items-start">
                             <div>
-                                <h2 class="text-3xl font-bold" id="cityName">--</h2>
-                                <p class="text-gray-500 dark:text-gray-400" id="countryName">--</p>
-                                <p class="text-lg mt-2" id="currentDesc">--</p>
+                                <h2 class="text-xl font-bold" id="cityName">--</h2>
+                                <p class="text-gray-500 dark:text-gray-400 text-sm" id="countryName">--</p>
+                                <p class="text-sm mt-1" id="currentDesc">--</p>
                             </div>
-                            <div class="flex items-center gap-4 mt-4 sm:mt-0">
-                                <i id="currentIcon" class="text-6xl text-yellow-400"></i>
-                                <p class="text-7xl font-light"><span id="currentTemp">--</span>°</p>
-                                <select id="unitSelect" class="bg-light-bg dark:bg-dark-bg rounded-lg p-1 focus:outline-none focus:ring-2 focus:ring-accent-blue">
+                            <div class="flex items-center gap-2">
+                                <i id="currentIcon" class="text-4xl text-yellow-400"></i>
+                                <p class="text-5xl font-light"><span id="currentTemp">--</span>°</p>
+                                <select id="unitSelect" class="bg-light-bg dark:bg-dark-bg rounded-lg p-1 self-start text-sm focus:outline-none focus:ring-2 focus:ring-accent-blue">
                                     <option value="celsius">C</option>
                                     <option value="fahrenheit">F</option>
                                 </select>
                             </div>
                         </div>
-                         <button id="save-location-btn" class="mt-4 text-sm text-accent-blue hover:underline"><i class="far fa-star"></i> Save Location</button>
+                         <button id="save-location-btn" class="mt-2 text-xs text-accent-blue hover:underline"><i class="far fa-star"></i> Save Location</button>
+                    </div>
+
+                    <!-- SINGLE DAY DETAILS (HIDDEN BY DEFAULT) -->
+                    <div id="single-day-details" class="bg-light-card dark:bg-dark-card p-3 rounded-2xl shadow-md hidden">
+                        <h3 class="text-base font-semibold mb-2" id="single-day-details-title">Details for --</h3>
+                        <div class="grid grid-cols-2 gap-x-3 gap-y-1 text-xs">
+                            <div class="flex justify-between"><span>Feels Like</span><span id="detail-single-feels-like" class="font-semibold">--°/--°</span></div>
+                            <div class="flex justify-between"><span>Wind</span><span id="detail-single-wind" class="font-semibold">-- km/h</span></div>
+                            <div class="flex justify-between"><span>UV Index</span><span id="detail-single-uv" class="font-semibold">--</span></div>
+                            <div class="flex justify-between"><span>Precipitation</span><span id="detail-single-precipitation" class="font-semibold">--%</span></div>
+                        </div>
                     </div>
                     
-                    <!-- HOURLY FORECAST -->
-                    <div class="bg-light-card dark:bg-dark-card p-6 rounded-2xl shadow-md">
-                        <h3 class="text-lg font-semibold mb-4">Hourly Forecast</h3>
-                        <div id="hourly-forecast" class="flex overflow-x-auto gap-4 pb-2 hourly-scroll"></div>
-                    </div>
-                    
-                    <!-- TEMPERATURE CHART -->
-                    <div class="bg-light-card dark:bg-dark-card p-6 rounded-2xl shadow-md">
-                        <h3 class="text-lg font-semibold mb-4">Temperature Trend (12h)</h3>
-                        <canvas id="tempChart" height="100"></canvas>
+                    <!-- HOURLY & CHART GRID -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 flex-grow">
+                        <div class="md:col-span-2 bg-light-card dark:bg-dark-card p-3 rounded-2xl shadow-md flex flex-col">
+                            <h3 class="text-base font-semibold mb-2" id="hourly-forecast-title">Hourly Forecast</h3>
+                            <div id="hourly-forecast" class="flex overflow-x-auto gap-2 hourly-scroll"></div>
+                        </div>
+                        <div class="bg-light-card dark:bg-dark-card p-3 rounded-2xl shadow-md flex flex-col">
+                            <h3 class="text-base font-semibold mb-2" id="chart-title">Temperature Trend</h3>
+                            <div class="relative flex-grow">
+                                <canvas id="tempChart"></canvas>
+                            </div>
+                        </div>
                     </div>
 
                     <!-- 7-DAY FORECAST -->
-                    <div class="bg-light-card dark:bg-dark-card p-6 rounded-2xl shadow-md">
-                        <h3 class="text-lg font-semibold mb-4">7-Day Forecast</h3>
-                        <div id="forecast-list" class="space-y-2"></div>
-                    </div>
-                    
-                    <!-- ALERTS -->
-                    <div id="alert-section" class="hidden bg-yellow-100 dark:bg-yellow-900/50 border-l-4 border-yellow-500 text-yellow-700 dark:text-yellow-300 p-4 rounded-lg shadow-md">
-                        <h3 class="font-bold mb-2">Alerts</h3>
-                        <p id="alert-text">No active alerts.</p>
+                    <div class="bg-light-card dark:bg-dark-card p-3 rounded-2xl shadow-md flex flex-col">
+                        <h3 class="text-base font-semibold mb-2">7-Day Forecast</h3>
+                        <div id="forecast-list" class="space-y-1 overflow-y-auto"></div>
                     </div>
                 </div>
             </div>
@@ -158,10 +158,20 @@ document.addEventListener('DOMContentLoaded', () => {
     const skeletonLoader = document.getElementById('skeleton-loader');
     const weatherContent = document.getElementById('weather-content');
     const tempChartCanvas = document.getElementById('tempChart');
+    const singleDayDetailsCard = document.getElementById('single-day-details');
+    const singleDayDetailsTitle = document.getElementById('single-day-details-title');
+    const detailSingleFeelsLike = document.getElementById('detail-single-feels-like');
+    const detailSingleWind = document.getElementById('detail-single-wind');
+    const detailSingleUv = document = document.getElementById('detail-single-uv');
+    const detailSinglePrecipitation = document.getElementById('detail-single-precipitation');
+    const hourlyForecastTitle = document.getElementById('hourly-forecast-title');
+    const chartTitle = document.getElementById('chart-title');
+
 
     // --- State & Config ---
     let currentCity = null;
     let tempChart = null;
+    let fullHourlyData = []; // Store full 7-day hourly forecast
     let savedLocations = JSON.parse(localStorage.getItem('savedLocations')) || [];
     const icons = {
         "Clear": "fa-sun", "Clouds": "fa-cloud", "Rain": "fa-cloud-showers-heavy",
@@ -175,7 +185,7 @@ document.addEventListener('DOMContentLoaded', () => {
         setupTheme();
         renderSavedLocations();
         const lastSearch = localStorage.getItem('lastWeatherSearch');
-        if (lastSearch) {
+        if (lastSearch && lastSearch.trim() !== '') {
             fetchWeather(lastSearch);
         }
         
@@ -209,10 +219,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- UI & Rendering ---
     const showLoader = (show) => {
         skeletonLoader.classList.toggle('hidden', !show);
-        if (show) {
-            weatherContent.classList.add('opacity-0');
-        } else {
-            weatherContent.classList.remove('opacity-0');
+        weatherContent.classList.toggle('opacity-0', show);
+        if (!show) {
             weatherContent.classList.add('animate-fade-slide-in');
         }
     };
@@ -225,7 +233,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const renderSavedLocations = () => {
         savedLocationsList.innerHTML = "";
         if (savedLocations.length === 0) {
-            savedLocationsList.innerHTML = `<li class="text-gray-500 dark:text-gray-400 text-sm">No saved locations.</li>`;
+            savedLocationsList.innerHTML = `<li class="text-gray-500 dark:text-gray-400 p-1">No saved locations yet.</li>`;
             return;
         }
         savedLocations.forEach(location => {
@@ -259,9 +267,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 throw new Error(errorData.error || "Failed to fetch weather data.");
             }
             const data = await response.json();
+            currentCity = data.city; // Update currentCity immediately
             displayWeather(data);
             localStorage.setItem('lastWeatherSearch', city);
-            currentCity = data.city;
+            // currentCity = data.city; // This line is moved up
         } catch (error) {
             showError(error.message);
         } finally {
@@ -297,87 +306,79 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Display Functions ---
     const displayWeather = (data) => {
-        // Current Weather
         document.getElementById("cityName").textContent = data.city;
         document.getElementById("countryName").textContent = data.country;
         document.getElementById("currentTemp").textContent = data.current.temp;
         document.getElementById("currentDesc").textContent = data.current.description;
-        document.getElementById("currentIcon").className = `text-6xl text-yellow-400 fas ${mapDescriptionToIcon(data.current.main)}`;
+        document.getElementById("currentIcon").className = `text-4xl text-yellow-400 fas ${mapDescriptionToIcon(data.current.main)}`;
 
-        // Hourly
-        hourlyForecastDiv.innerHTML = "";
-        data.hourly.forEach(hour => {
-            const card = document.createElement("div");
-            card.className = "flex-shrink-0 text-center space-y-2 p-3";
-            card.innerHTML = `
-                <p class="text-sm text-gray-500 dark:text-gray-400">${hour.time}</p>
-                <i class="fas ${mapDescriptionToIcon(hour.main)} text-xl"></i>
-                <p class="font-semibold">${hour.temp}°</p>`;
-            hourlyForecastDiv.appendChild(card);
-        });
-        
-        // Temperature Chart
-        renderTemperatureChart(data.hourly);
+        fullHourlyData = data.hourly; // Store full hourly data
 
-        // 7-Day Forecast
+        // Display current hourly forecast (first 24 hours)
+        updateHourlyForecastDisplay(fullHourlyData.slice(0, 24));
+        renderTemperatureChart(fullHourlyData.slice(0, 24));
+        hourlyForecastTitle.textContent = "Hourly Forecast (Today)";
+        chartTitle.textContent = "Temperature Trend (Today)";
+
         forecastListDiv.innerHTML = "";
+        singleDayDetailsCard.classList.add('hidden'); // Hide details when new city loads
+
         data.daily.forEach(day => {
             const item = document.createElement("div");
-            item.className = "border-b border-gray-200 dark:border-gray-700 last:border-b-0";
-
-            const dayOfWeek = new Date(day.day).toLocaleDateString('en-US', { weekday: 'short' });
+            item.className = "border-b border-gray-200 dark:border-gray-700 last:border-b-0 py-1";
+            const date = new Date(day.day);
+            const dayOfWeek = date.toLocaleDateString('en-US', { weekday: 'short' });
+            const dayDate = day.day; // YYYY-MM-DD
 
             item.innerHTML = `
                 <div class="grid grid-cols-4 items-center gap-2 cursor-pointer hover:bg-light-bg dark:hover:bg-dark-bg rounded-lg p-2 daily-summary">
-                    <p class="font-medium col-span-1">${dayOfWeek}</p>
+                    <p class="font-medium text-sm col-span-1">${dayOfWeek}</p>
                     <div class="col-span-1 flex items-center gap-2">
                         <i class="fas ${mapDescriptionToIcon(day.main)}"></i>
-                        <span class="text-sm hidden sm:inline">${day.description}</span>
+                        <span class="text-xs hidden sm:inline">${day.description}</span>
                     </div>
-                    <div class="col-span-2 text-right">
+                    <div class="col-span-2 text-right text-sm">
                         <span class="font-semibold">${day.max_temp}°</span> / 
                         <span class="text-gray-500 dark:text-gray-400">${day.min_temp}°</span>
-                    </div>
-                </div>
-                <div class="daily-details p-4 bg-light-bg dark:bg-dark-bg/50 rounded-b-lg">
-                    <div class="grid grid-cols-2 gap-4 text-sm">
-                        <div class="flex justify-between"><span>Feels Like</span><span class="font-semibold">${day.apparent_max}° / ${day.apparent_min}°</span></div>
-                        <div class="flex justify-between"><span>Wind</span><span class="font-semibold">${day.wind_speed} km/h</span></div>
-                        <div class="flex justify-between"><span>UV Index</span><span class="font-semibold">${day.uv_index}</span></div>
-                        <div class="flex justify-between"><span>Precipitation</span><span class="font-semibold">${day.precipitation_probability}%</span></div>
                     </div>
                 </div>`;
             
             const summary = item.querySelector('.daily-summary');
-            const details = item.querySelector('.daily-details');
-
             summary.addEventListener('click', () => {
-                const currentlyOpen = document.querySelector('.daily-details.open');
-                if (currentlyOpen && currentlyOpen !== details) {
-                    currentlyOpen.classList.remove('open');
-                    currentlyOpen.style.maxHeight = '0';
-                }
-                details.classList.toggle('open');
-                if (details.classList.contains('open')) {
-                    details.style.maxHeight = details.scrollHeight + "px";
-                } else {
-                    details.style.maxHeight = '0';
-                }
+                updateSingleDayDetails(day, dayOfWeek);
+                // Update hourly forecast and chart for the clicked day
+                const selectedDayHourlyData = fullHourlyData.filter(hour => hour.time.startsWith(dayDate));
+                updateHourlyForecastDisplay(selectedDayHourlyData);
+                renderTemperatureChart(selectedDayHourlyData);
+                hourlyForecastTitle.textContent = `Hourly Forecast (${dayOfWeek})`;
+                chartTitle.textContent = `Temperature Trend (${dayOfWeek})`;
             });
-
             forecastListDiv.appendChild(item);
         });
-        
-        // Alerts
-        const alertSection = document.getElementById('alert-section');
-        if (data.alerts && data.alerts.length > 0) {
-            document.getElementById('alert-text').textContent = data.alerts.join("\n");
-            alertSection.classList.remove('hidden');
-        } else {
-            alertSection.classList.add('hidden');
-        }
 
         updateSaveButton();
+    };
+
+    const updateHourlyForecastDisplay = (hourlyData) => {
+        hourlyForecastDiv.innerHTML = "";
+        hourlyData.forEach(hour => {
+            const card = document.createElement("div");
+            card.className = "flex-shrink-0 text-center space-y-1 p-2";
+            card.innerHTML = `
+                <p class="text-sm text-gray-500 dark:text-gray-400">${hour.time.substring(11, 16)}</p> <!-- HH:MM -->
+                <i class="fas ${mapDescriptionToIcon(hour.main)} text-base"></i>
+                <p class="font-semibold text-sm">${hour.temp}°</p>`;
+            hourlyForecastDiv.appendChild(card);
+        });
+    };
+
+    const updateSingleDayDetails = (dayData, dayOfWeek) => {
+        singleDayDetailsTitle.textContent = `Details for ${dayOfWeek}`;
+        detailSingleFeelsLike.textContent = `${dayData.apparent_max}°/${dayData.apparent_min}°`;
+        detailSingleWind.textContent = `${dayData.wind_speed} km/h`;
+        detailSingleUv.textContent = dayData.uv_index;
+        detailSinglePrecipitation.textContent = `${dayData.precipitation_probability}%`;
+        singleDayDetailsCard.classList.remove('hidden'); // Show the details card
     };
 
     const renderTemperatureChart = (hourlyData) => {
@@ -390,14 +391,16 @@ document.addEventListener('DOMContentLoaded', () => {
         tempChart = new Chart(ctx, {
             type: 'line',
             data: {
-                labels: hourlyData.map(h => h.time),
+                labels: hourlyData.map(h => h.time.substring(11, 16)), // HH:MM
                 datasets: [{
-                    label: 'Temperature',
+                    label: 'Temp',
                     data: hourlyData.map(h => h.temp),
                     borderColor: '#3B82F6',
                     backgroundColor: 'rgba(59, 130, 246, 0.1)',
-                    tension: 0.3,
-                    fill: true
+                    tension: 0.4,
+                    fill: true,
+                    pointRadius: 3, // Show points
+                    pointBackgroundColor: '#3B82F6'
                 }]
             },
             options: {
@@ -405,17 +408,31 @@ document.addEventListener('DOMContentLoaded', () => {
                 maintainAspectRatio: false,
                 scales: {
                     y: {
+                        display: true, // Show Y-axis
                         beginAtZero: false,
                         grid: { color: isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)' },
-                        ticks: { color: isDark ? '#E2E8F0' : '#1E293B' }
+                        ticks: { color: isDark ? '#E2E8F0' : '#1E293B' },
+                        title: { display: true, text: 'Temperature (°)', color: isDark ? '#E2E8F0' : '#1E293B' }
                     },
                     x: {
+                        display: true, // Show X-axis
                         grid: { display: false },
-                        ticks: { color: isDark ? '#E2E8F0' : '#1E293B' }
+                        ticks: { color: isDark ? '#E2E8F0' : '#1E293B' },
+                        title: { display: true, text: 'Time', color: isDark ? '#E2E8F0' : '#1E293B' }
                     }
                 },
                 plugins: {
-                    legend: { display: false }
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return ` ${context.dataset.label}: ${context.raw}°`;
+                            }
+                        }
+                    }
+                },
+                layout: {
+                    padding: { top: 5, bottom: 5 }
                 }
             }
         });

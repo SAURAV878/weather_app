@@ -77,7 +77,7 @@ def current_weather(request):
         f"&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,visibility,wind_speed_10m"
         f"&hourly=temperature_2m,weather_code"
         f"&daily=weather_code,temperature_2m_max,temperature_2m_min,uv_index_max,apparent_temperature_max,apparent_temperature_min,wind_speed_10m_max,precipitation_probability_max"
-        f"&timezone=auto&temperature_unit={unit_param}"
+        f"&timezone=auto&temperature_unit={unit_param}&forecast_days=7"
     )
     weather_data = requests.get(forecast_url).json()
 
@@ -107,15 +107,16 @@ def current_weather(request):
         "aqi": aqi_data.get("current", {}).get("european_aqi", "N/A")
     }
 
-    # 7) HOURLY FORECAST (next 12 hours)
+    # 7) HOURLY FORECAST (now for all 7 days)
     hourly = weather_data["hourly"]
     hourly_forecast = []
-    for i in range(12):
+    for i in range(len(hourly["time"])):
         hourly_forecast.append({
-            "time": hourly["time"][i][-5:],  # HH:MM
+            "time": hourly["time"][i], # Full ISO timestamp
             "temp": round(hourly["temperature_2m"][i]),
             "main": WMO_CODES.get(hourly["weather_code"][i], "Clear Sky")
         })
+
 
     # 8) DAILY FORECAST (next 7 days)
     daily = weather_data["daily"]
