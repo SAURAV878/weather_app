@@ -70,9 +70,20 @@
 
                 <div class="bg-light-card dark:bg-dark-card p-3 rounded-2xl shadow-md flex-grow flex flex-col">
                     <h2 class="text-base font-semibold mb-2 flex items-center gap-2"><i class="fas fa-star text-yellow-400"></i> Saved</h2>
-                    <ul id="saved-locations" class="space-y-1 overflow-y-auto text-sm max-h-40">
+                    <ul id="saved-locations" class="space-y-1 overflow-y-auto text-sm max-h-24 hourly-scroll">
                         <li class="text-gray-500 dark:text-gray-400 p-1">No saved locations yet.</li>
                     </ul>
+                </div>
+
+                <!-- SINGLE DAY DETAILS (HIDDEN BY DEFAULT) - MOVED HERE -->
+                <div id="single-day-details" class="bg-light-card dark:bg-dark-card p-4 rounded-2xl shadow-md hidden">
+                    <h3 class="text-lg font-semibold mb-2" id="single-day-details-title">Details for --</h3>
+                    <div class="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
+                        <div class="flex justify-between"><span>Feels Like</span><span id="detail-single-feels-like" class="font-semibold">--°/--°</span></div>
+                        <div class="flex justify-between"><span>Wind</span><span id="detail-single-wind" class="font-semibold">-- km/h</span></div>
+                        <div class="flex justify-between"><span>UV Index</span><span id="detail-single-uv" class="font-semibold">--</span></div>
+                        <div class="flex justify-between"><span>Precipitation</span><span id="detail-single-precipitation" class="font-semibold">--%</span></div>
+                    </div>
                 </div>
             </aside>
 
@@ -105,17 +116,6 @@
                             </div>
                         </div>
                          <button id="save-location-btn" class="mt-2 text-xs text-accent-blue hover:underline"><i class="far fa-star"></i> Save Location</button>
-                    </div>
-
-                    <!-- SINGLE DAY DETAILS (HIDDEN BY DEFAULT) -->
-                    <div id="single-day-details" class="bg-light-card dark:bg-dark-card p-3 rounded-2xl shadow-md hidden">
-                        <h3 class="text-base font-semibold mb-2" id="single-day-details-title">Details for --</h3>
-                        <div class="grid grid-cols-2 gap-x-3 gap-y-1 text-xs">
-                            <div class="flex justify-between"><span>Feels Like</span><span id="detail-single-feels-like" class="font-semibold">--°/--°</span></div>
-                            <div class="flex justify-between"><span>Wind</span><span id="detail-single-wind" class="font-semibold">-- km/h</span></div>
-                            <div class="flex justify-between"><span>UV Index</span><span id="detail-single-uv" class="font-semibold">--</span></div>
-                            <div class="flex justify-between"><span>Precipitation</span><span id="detail-single-precipitation" class="font-semibold">--%</span></div>
-                        </div>
                     </div>
                     
                     <!-- HOURLY & CHART GRID -->
@@ -162,7 +162,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const singleDayDetailsTitle = document.getElementById('single-day-details-title');
     const detailSingleFeelsLike = document.getElementById('detail-single-feels-like');
     const detailSingleWind = document.getElementById('detail-single-wind');
-    const detailSingleUv = document = document.getElementById('detail-single-uv');
+    const detailSingleUv = document.getElementById('detail-single-uv');
     const detailSinglePrecipitation = document.getElementById('detail-single-precipitation');
     const hourlyForecastTitle = document.getElementById('hourly-forecast-title');
     const chartTitle = document.getElementById('chart-title');
@@ -238,7 +238,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         savedLocations.forEach(location => {
             const li = document.createElement('li');
-            li.className = "flex justify-between items-center p-2 rounded-lg hover:bg-light-bg dark:hover:bg-dark-bg cursor-pointer";
+            li.className = "flex justify-between items-center p-1 rounded-lg hover:bg-light-bg dark:hover:bg-dark-bg cursor-pointer";
             li.innerHTML = `<span>${location}</span><button data-location="${location}" class="delete-location-btn text-red-500 hover:text-red-700 text-xs"><i class="fas fa-trash"></i></button>`;
             li.addEventListener('click', (e) => {
                 if (!e.target.closest('.delete-location-btn')) {
