@@ -6,7 +6,20 @@ from django.shortcuts import render
 
 # ---------------- HOME PAGE ----------------
 def home(request):
-    return render(request, "weather.html")
+    city = request.GET.get('city', '').strip()
+    unit = request.GET.get("unit", "celsius").lower()
+
+    if not city:
+        city = "London"  # Default city if none is provided
+
+    weather_data, status_code = get_weather_data_for_city(city, unit)
+
+    context = {
+        'weather': weather_data if status_code == 200 else None,
+        'error': weather_data.get('error') if status_code != 200 else None
+    }
+    
+    return render(request, "weather.html", context)
 
 
 @api_view(['GET'])
@@ -47,27 +60,18 @@ WMO_CODES = {
 }
 
 
-# ----------------- MAIN WEATHER API -----------------
-@api_view(['GET'])
-def current_weather(request):
-    city = request.GET.get('city', '').strip()
-
-    if not city:
-        return Response({"error": "City name is required"}, status=400)
-
+def get_weather_data_for_city(city, unit="celsius"):
     # 1) Geocoding
     geo_url = f"https://geocoding-api.open-meteo.com/v1/search?name={city}&count=1"
     geo_res = requests.get(geo_url).json()
 
-    # FIX: Prevent wrong weather for non-existing city
     if not geo_res.get("results"):
-        return Response({"error": "City not found or invalid input"}, status=404)
+        return {"error": "City not found or invalid input"}, 404
 
     place = geo_res["results"][0]
     lat, lon = place["latitude"], place["longitude"]
 
     # 2) Units
-    unit = request.GET.get("unit", "celsius").lower()
     unit_param = "fahrenheit" if unit == "fahrenheit" else "celsius"
 
     # 3) Weather API Call
@@ -117,7 +121,6 @@ def current_weather(request):
             "main": WMO_CODES.get(hourly["weather_code"][i], "Clear Sky")
         })
 
-
     # 8) DAILY FORECAST (next 7 days)
     daily = weather_data["daily"]
     daily_forecast = []
@@ -135,8 +138,7 @@ def current_weather(request):
             "precipitation_probability": daily["precipitation_probability_max"][i]
         })
 
-    # RESPONSE
-    return Response({
+    return {
         "city": place.get("name"),
         "country": place.get("country"),
         "latitude": lat,
@@ -146,4 +148,18 @@ def current_weather(request):
         "hourly": hourly_forecast,
         "daily": daily_forecast,
         "alerts": []
-    })
+    }, 200 # Return data and status code
+
+
+# ----------------- MAIN WEATHER API -----------------
+@api_view(['GET'])
+def current_weather(request):
+    city = request.GET.get('city', '').strip()
+    unit = request.GET.get("unit", "celsius").lower()
+
+    if not city:
+        return Response({"error": "City name is required"}, status=400)
+
+    weather_data, status_code = get_weather_data_for_city(city, unit)
+
+    return Response(weather_data, status=status_code)
